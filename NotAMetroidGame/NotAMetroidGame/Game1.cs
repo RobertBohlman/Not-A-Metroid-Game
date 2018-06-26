@@ -11,7 +11,15 @@ namespace NotAMetroidGame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        
+        Creature testEnemy;
+
+        public static Vector2 GRAV_CONSTANT;
+        public static Vector2 RIGHT;
+        public static Vector2 LEFT;
+        public static Vector2 JUMP;
+
+        KeyboardState OldKeyState;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -27,7 +35,10 @@ namespace NotAMetroidGame
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            GRAV_CONSTANT = new Vector2(0, 800);
+            RIGHT = new Vector2(250, 0);
+            LEFT = new Vector2(-250, 0);
+            JUMP = new Vector2(0, -600);
             base.Initialize();
         }
 
@@ -39,8 +50,9 @@ namespace NotAMetroidGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            testEnemy = new Skeleton(Content);
             // TODO: use this.Content to load your game content here
+
         }
 
         /// <summary>
@@ -64,6 +76,20 @@ namespace NotAMetroidGame
 
             // TODO: Add your update logic here
 
+            var kstate = Keyboard.GetState();
+
+            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && testEnemy.position.Y >= 385)
+                testEnemy.Move(JUMP, gameTime);
+
+            if (kstate.IsKeyDown(Keys.Right))
+                testEnemy.Move(RIGHT, gameTime);
+
+            if (kstate.IsKeyDown(Keys.Left))
+                testEnemy.Move(LEFT, gameTime);
+
+            OldKeyState = kstate;
+            testEnemy.Update(gameTime);
+
             base.Update(gameTime);
         }
 
@@ -76,6 +102,10 @@ namespace NotAMetroidGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+
+            spriteBatch.Begin();
+            spriteBatch.Draw(testEnemy.sprite, testEnemy.position, Color.White);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }

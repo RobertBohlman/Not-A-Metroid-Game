@@ -1,7 +1,18 @@
 ﻿using System;
+using Microsoft.Xna.Framework;
 
-public class Player : Creature {
+namespace NotAMetroidGame
+{
+    public class Player : Creature
+    {
 
-	public Player() {
-	}
+        public Player()
+        {
+        }
+
+        public override void Action(GameTime gameTime)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

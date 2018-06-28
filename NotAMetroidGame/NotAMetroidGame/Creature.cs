@@ -1,40 +1,77 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+using System;
+using System.Diagnostics;
 
-public class Creature : Entity {
-    //This may or may not stay as an int
-    private int HP;
+namespace NotAMetroidGame
+{
+    public abstract class Creature : Entity
+    {
+        //This may or may not stay as an int
+        private int HP;
 
-    //Reduces damage taken
-    private int armor;
+        //Reduces damage taken
+        private int armor;
 
-	public Creature() {
-	}
+        public Creature()
+        {
+        }
 
-    /** Adjust this creature's position by adding the movement vector.
-     * 
-     * This function will likely be where the logic for collision is implemented.
-     * 
-     **/
-    public void Move(Vector2D movement) {
+        /** Adjust this creature's velocity by adding the movement vector.
+         * 
+         * This function will likely be where the logic for collision is implemented.
+         * 
+         **/
+        public void Move(Vector2 movement, GameTime gameTime)
+        {
+            this.velocity = Vector2.Add(this.velocity, movement);
+        }
 
+        /** Deals X damage to this creature's HP, returns true if this damage is lethal.
+         * 
+         * Example: Player lands a hit on enemy x, code checks the stats on the 
+         * player's weapon, charatcer, etc and calls x.Damage(howevermuch damage should be done).
+         * This function takes into account armor and other stats we decide to consider.
+         * 
+         * Some enemies may have special effects or resistances when they take damage.
+         * For this instance, that enemy can override this method.
+         * 
+         **/
+        public bool Damage(long damage)
+        {
+            return false;
+
+        }
+
+        //*Insert Zelda CD-I reference here*
+        public void Die()
+        {
+
+        }
+
+        /**Update Creature's position
+         * 
+         * This method contains the basic info for adding velocity to any creature's position
+         * 
+         * Player and other enemies with abnormal movement will override this method
+         **/
+        public virtual void Update(GameTime gameTime)
+        {
+            Debug.WriteLine("V: " + this.velocity);
+            Debug.WriteLine("P: " + this.position);
+            this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
+            this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
+
+            //This prevents acceleration/deceleration for crisp movement
+            this.velocity.X = 0;
+            
+        }
+
+        /**Logic for enemy AI
+         * 
+         * Called every update, determine if move/attack, etc.
+         **/
+        public abstract void Action(GameTime gameTime);
     }
 
-    /** Deals X damage to this creature's HP, returns true if this damage is lethal.
-     * 
-     * Example: Player lands a hit on enemy x, code checks the stats on the 
-     * player's weapon, charatcer, etc and calls x.Damage(howevermuch damage should be done).
-     * This function takes into account armor and other stats we decide to consider.
-     * 
-     * Some enemies may have special effects or resistances when they take damage.
-     * For this instance, that enemy can override this function.
-     * 
-     **/
-    public bool Damage(long damage) {
-
-    }
-
-    //*Insert Zelda CD-I reference here*
-    public void Die() {
-
-    }
 }

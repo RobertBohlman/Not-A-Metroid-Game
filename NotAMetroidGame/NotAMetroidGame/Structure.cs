@@ -1,8 +1,13 @@
 ﻿using System;
 
-public class Structure {
+namespace NotAMetroidGame
+{
+    public class Structure
+    {
 
-	public Structure() {
+        public Structure()
+        {
 
-	}
+        }
+    }
 }

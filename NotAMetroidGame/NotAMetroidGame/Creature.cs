@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
 
@@ -11,8 +12,6 @@ namespace NotAMetroidGame
 
         //Reduces damage taken
         private int armor;
-
-        private float fallMult = 2.5f;
 
         public Creature()
         {
@@ -35,7 +34,7 @@ namespace NotAMetroidGame
          * This function takes into account armor and other stats we decide to consider.
          * 
          * Some enemies may have special effects or resistances when they take damage.
-         * For this instance, that enemy can override this function.
+         * For this instance, that enemy can override this method.
          * 
          **/
         public bool Damage(long damage)
@@ -50,31 +49,21 @@ namespace NotAMetroidGame
 
         }
 
-        public void Jump()
-        {
-            this.velocity = Vector2.Add(this.velocity, new Vector2(0, -50));
-        }
-
-        public void Update(GameTime gameTime)
+        /**Update Creature's position
+         * 
+         * This method contains the basic info for adding velocity to any creature's position
+         * 
+         * Player and other enemies with abnormal movement will override this method
+         **/
+        public virtual void Update(GameTime gameTime)
         {
             Debug.WriteLine("V: " + this.velocity);
             Debug.WriteLine("P: " + this.position);
             this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
             this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
+
+            //This prevents acceleration/deceleration for crisp movement
             this.velocity.X = 0;
-
-            if (this.velocity.Y > 0)
-            {
-                this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (fallMult - 1));
-            }
-
-            if (this.position.Y >= 385)
-            {
-                Debug.WriteLine("Grounded");
-                this.velocity = Vector2.Zero;
-                this.position.Y = 385;
-            }
-            
             
         }
 

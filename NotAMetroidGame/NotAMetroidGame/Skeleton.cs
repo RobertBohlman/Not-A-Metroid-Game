@@ -15,7 +15,6 @@ namespace NotAMetroidGame
             this.velocity = new Vector2(0, 0);
         }
 
-        
         public override void Action(GameTime gameTime)
         {
             //if (this.position.Y == 380)

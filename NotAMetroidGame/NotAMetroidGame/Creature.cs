@@ -45,9 +45,10 @@ namespace NotAMetroidGame
         }
 
         //*Insert Zelda CD-I reference here*
+        //(6/26/2018 : Changed the tint of the sprite to visually show that the creature died.
         public void Die()
         {
-
+            tint = Color.Red;
         }
 
         public void Jump()
@@ -74,8 +75,9 @@ namespace NotAMetroidGame
                 this.velocity = Vector2.Zero;
                 this.position.Y = 385;
             }
-            
-            
+            // Updating bound.  Hard-coded values need to be removed.
+            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                new Vector3(this.position.X + 66, this.position.Y + 96, 0));
         }
 
         /**Logic for enemy AI

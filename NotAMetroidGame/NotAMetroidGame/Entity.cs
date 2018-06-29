@@ -18,8 +18,12 @@ namespace NotAMetroidGame
         //Entity's current velocity
         public Vector2 velocity;
 
+        //Tint applied to the entity's sprite
+        public Color tint;
+
         public Entity()
         {
+            tint = Color.White;
         }
 
         /**[NOTE]: This is likely to be removed 

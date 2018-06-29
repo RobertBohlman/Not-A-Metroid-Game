@@ -13,8 +13,11 @@ namespace NotAMetroidGame
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Creature testEnemy;
-        Player testPlayer;
+        Player player;
 
+
+        //Should probably have a better place for these,
+        //maybe an enum class?
         public static Vector2 GRAV_CONSTANT;
         public static Vector2 RIGHT;
         public static Vector2 LEFT;
@@ -37,7 +40,7 @@ namespace NotAMetroidGame
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            GRAV_CONSTANT = new Vector2(0, 800);
+            GRAV_CONSTANT = new Vector2(0, 900);
             RIGHT = new Vector2(250, 0);
             LEFT = new Vector2(-250, 0);
             JUMP = new Vector2(0, -600);
@@ -52,8 +55,9 @@ namespace NotAMetroidGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            testPlayer = new Player(Content);
+
             testEnemy = new Skeleton(Content);
+            player = new Player(Content);
             // TODO: use this.Content to load your game content here
 
         }
@@ -81,25 +85,24 @@ namespace NotAMetroidGame
 
             var kstate = Keyboard.GetState();
 
-            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && testPlayer.position.Y >= 385)
-                testPlayer.Move(JUMP, gameTime);
+            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.position.Y >= 385)
+                player.Move(JUMP, gameTime);
 
             if (kstate.IsKeyDown(Keys.Right))
-                testPlayer.Move(RIGHT, gameTime);
+                player.Move(RIGHT, gameTime);
 
             if (kstate.IsKeyDown(Keys.Left))
-                testPlayer.Move(LEFT, gameTime);
+                player.Move(LEFT, gameTime);
 
             // Used to test attacking
             if (kstate.IsKeyDown(Keys.Z))
-                testPlayer.attacking = true;
+                player.attacking = true;
 
             OldKeyState = kstate;
-            testEnemy.Update(gameTime);
-            testPlayer.Update(gameTime);
+            player.Update(gameTime);
 
             // If attacking and attack boundingbox is intersecting the enemy
-            if (testPlayer.Attack(gameTime) && testPlayer.hit.Intersects(testEnemy.bound))
+            if (player.Attack(gameTime) && player.hit.Intersects(testEnemy.bound))
             {
                 Debug.WriteLine("HIT");
                 testEnemy.Die();
@@ -109,17 +112,17 @@ namespace NotAMetroidGame
              * Vertical movement is halted when the player lands on the enemy to an
              * extent. Eventually vertical velocity will overcome the enemy boundingbox.
              */
-            if (testEnemy.bound.Intersects(testPlayer.bound))
+            if (testEnemy.bound.Intersects(player.bound))
             {
                 Debug.WriteLine("Collision");
-                Vector2 newPosition = testPlayer.position;
-                if (testPlayer.velocity.X > 0)
+                Vector2 newPosition = player.position;
+                if (player.velocity.X > 0)
                     newPosition.X = testEnemy.position.X - 66;
-                else if (testPlayer.velocity.X < 0)
+                else if (player.velocity.X < 0)
                     newPosition.X = testEnemy.position.X + 66;
-                if (testPlayer.velocity.Y > 0)
+                if (player.velocity.Y > 0)
                     newPosition.Y = testEnemy.position.Y - 96;
-                testPlayer.position = newPosition;
+                player.position = newPosition;
             }
 
 
@@ -137,8 +140,9 @@ namespace NotAMetroidGame
             // TODO: Add your drawing code here
 
             spriteBatch.Begin();
-            spriteBatch.Draw(testPlayer.sprite, testPlayer.position, testPlayer.tint);
+
             spriteBatch.Draw(testEnemy.sprite, testEnemy.position, testEnemy.tint);
+            spriteBatch.Draw(player.sprite, player.position, null, Color.White, 0, Vector2.Zero, 0.23f, SpriteEffects.None, 0f);
             spriteBatch.End();
 
             base.Draw(gameTime);

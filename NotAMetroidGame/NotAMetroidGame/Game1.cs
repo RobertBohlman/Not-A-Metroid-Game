@@ -12,8 +12,10 @@ namespace NotAMetroidGame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Camera camera;
         Creature testEnemy;
         Player player;
+        Map map;
 
 
         //Should probably have a better place for these,
@@ -55,9 +57,10 @@ namespace NotAMetroidGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            camera = new Camera();
             testEnemy = new Skeleton(Content);
             player = new Player(Content);
+            map = new Map();
             // TODO: use this.Content to load your game content here
 
         }
@@ -125,6 +128,33 @@ namespace NotAMetroidGame
                 player.position = newPosition;
             }
 
+            if (player.position.X < map.left)
+            {
+                player.position.X = map.left;
+            }
+            if (player.position.X > map.right - 66)
+            {
+                player.position.X = map.right - 66;
+            }
+
+            camera.Update(player.position);
+
+            if (camera.position.X < map.left)
+            {
+                camera.position.X = map.left;
+            }
+            if (camera.position.X > map.right - 800)
+            {
+                camera.position.X = map.right - 800;
+            }
+            if (camera.position.Y < map.top)
+            {
+                camera.position.Y = map.top;
+            }
+            if (camera.position.Y > map.bottom - 600)
+            {
+                camera.position.Y = map.bottom - 600;
+            }
 
             base.Update(gameTime);
         }
@@ -141,8 +171,8 @@ namespace NotAMetroidGame
 
             spriteBatch.Begin();
 
-            spriteBatch.Draw(testEnemy.sprite, testEnemy.position, testEnemy.tint);
-            spriteBatch.Draw(player.sprite, player.position, null, Color.White, 0, Vector2.Zero, 0.23f, SpriteEffects.None, 0f);
+            spriteBatch.Draw(testEnemy.sprite, Vector2.Subtract(testEnemy.position, camera.position), testEnemy.tint);
+            spriteBatch.Draw(player.sprite, Vector2.Subtract(player.position, camera.position), null, Color.White, 0, Vector2.Zero, 0.23f, SpriteEffects.None, 0f);
             spriteBatch.End();
 
             base.Draw(gameTime);

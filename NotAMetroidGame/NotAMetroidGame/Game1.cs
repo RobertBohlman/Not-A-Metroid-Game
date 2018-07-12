@@ -104,9 +104,8 @@ namespace NotAMetroidGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-
             spriteBatch.Begin();
-            spriteBatch.Draw(player.sprite, player.position, null, Color.White, 0, Vector2.Zero, 0.23f, SpriteEffects.None, 0f);
+            player.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -24,8 +24,12 @@ namespace NotAMetroidGame
 
         protected Animation currentAnimation;
 
+        //Tint applied to the entity's sprite
+        public Color tint;
+
         public Entity()
         {
+            tint = Color.White;
         }
 
         /**[NOTE]: This is likely to be removed 

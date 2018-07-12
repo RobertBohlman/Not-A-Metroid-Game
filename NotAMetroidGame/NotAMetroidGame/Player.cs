@@ -8,6 +8,18 @@ namespace NotAMetroidGame
 {
     public class Player : Creature
     {
+        //keeps track of elapsed time since start of an attack
+        private float attackTimer;
+
+        //in an attacking state or not
+        public bool attacking;
+
+        //bounding box of attack
+        public BoundingBox hit;
+
+        public float width = 103.5f;
+        public float height = 103.5f;
+
         //Jump modifiers
         protected float fallMult = 2.5f;
         protected float shortJump = 15f;
@@ -22,6 +34,7 @@ namespace NotAMetroidGame
         {
             //Init placeholder image
             this.sprite = sprite = content.Load<Texture2D>("sprite_base_addon_2012_12_14");
+            attacking = false;
             this.position = new Vector2(10, 380);
             this.velocity = new Vector2(0, 0);
 
@@ -54,7 +67,33 @@ namespace NotAMetroidGame
             currentAnimation = idle;
         }
 
-        public override void Update(GameTime gameTime)
+        /**
+         * (Likely to be altered or removed.  Used for boundingbox testing)
+         * Attack updates the attack bounding box.
+         * Returns whether or not the player is attacking.
+         */
+        public bool Attack(GameTime gameTime)
+        {
+            if (attacking)
+            {
+                attackTimer += gameTime.ElapsedGameTime.Milliseconds;
+                hit = new BoundingBox(new Vector3(this.position.X - 100, this.position.Y + 30, 0),
+                    new Vector3(this.position.X, this.position.Y + 40, 0));
+                if (attackTimer > 100)
+                {
+                    attacking = false;
+                    attackTimer = 0;
+                }
+                return true;
+
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Update(GameTime gameTime, Level map)
         {
             base.Update(gameTime);
 
@@ -72,11 +111,11 @@ namespace NotAMetroidGame
                 fall.Update(gameTime);
             }
 
-            if (this.position.Y >= 385)
+            if (this.position.Y >= 408.5)
             {
                 //Debug.WriteLine("Grounded");
                 this.velocity = Vector2.Zero;
-                this.position.Y = 385;
+                this.position.Y = 408.5f;
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Right) && this.position.Y >= 385)

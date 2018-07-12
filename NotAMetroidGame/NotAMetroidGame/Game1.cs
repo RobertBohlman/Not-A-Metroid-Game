@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace NotAMetroidGame
 {
@@ -11,7 +12,11 @@ namespace NotAMetroidGame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Creature player;
+        Camera camera;
+        Creature testEnemy;
+        Player player;
+        Level map;
+
 
         //Should probably have a better place for these,
         //maybe an enum class?
@@ -52,7 +57,11 @@ namespace NotAMetroidGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            camera = new Camera();
+            testEnemy = new Skeleton(Content);
             player = new Player(Content);
+            map = new TestLevel();
+            map.InitMap(Content);
             // TODO: use this.Content to load your game content here
 
         }
@@ -89,8 +98,65 @@ namespace NotAMetroidGame
             if (kstate.IsKeyDown(Keys.Left))
                 player.Move(LEFT, gameTime);
 
+            // Used to test attacking
+            if (kstate.IsKeyDown(Keys.Z))
+                player.attacking = true;
+
             OldKeyState = kstate;
-            player.Update(gameTime);
+            player.Update(gameTime, map);
+
+            // If attacking and attack boundingbox is intersecting the enemy
+            if (player.Attack(gameTime) && player.hit.Intersects(testEnemy.bound))
+            {
+                Debug.WriteLine("HIT");
+                testEnemy.Die();
+            }
+
+            /* Collision detection testing.  Does not prevent horizontal movement.
+             * Vertical movement is halted when the player lands on the enemy to an
+             * extent. Eventually vertical velocity will overcome the enemy boundingbox.
+             */
+            if (testEnemy.bound.Intersects(player.bound))
+            {
+                Debug.WriteLine("Collision");
+                Vector2 newPosition = player.position;
+                if (player.velocity.X > 0)
+                    newPosition.X = testEnemy.position.X - 66;
+                else if (player.velocity.X < 0)
+                    newPosition.X = testEnemy.position.X + 66;
+                if (player.velocity.Y > 0)
+                    newPosition.Y = testEnemy.position.Y - 96;
+                player.position = newPosition;
+            }
+
+            if (player.position.X < map.left)
+            {
+                player.position.X = map.left;
+            }
+            if (player.position.X > map.right - 66)
+            {
+                player.position.X = map.right - 66;
+            }
+
+            camera.Update(player.position);
+
+            if (camera.position.X < map.left)
+            {
+                camera.position.X = map.left;
+            }
+            if (camera.position.X > map.right - 800)
+            {
+                camera.position.X = map.right - 800;
+            }
+            if (camera.position.Y < map.top)
+            {
+                camera.position.Y = map.top;
+            }
+            if (camera.position.Y > map.bottom - 600)
+            {
+                camera.position.Y = map.bottom - 600;
+            }
+            map.Update(gameTime, camera);
 
             base.Update(gameTime);
         }
@@ -106,6 +172,10 @@ namespace NotAMetroidGame
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             player.Draw(spriteBatch);
+
+
+            map.Draw(spriteBatch);
+            spriteBatch.Draw(testEnemy.sprite, Vector2.Subtract(testEnemy.position, camera.position), testEnemy.tint);
             spriteBatch.End();
 
             base.Draw(gameTime);

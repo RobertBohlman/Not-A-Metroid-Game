@@ -46,7 +46,7 @@
     <Compile Include="Creature.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Game1.cs" />
-    <Compile Include="Map.cs" />
+    <Compile Include="Level.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

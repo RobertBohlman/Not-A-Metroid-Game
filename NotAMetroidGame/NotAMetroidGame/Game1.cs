@@ -15,7 +15,7 @@ namespace NotAMetroidGame
         Camera camera;
         Creature testEnemy;
         Player player;
-        Map map;
+        Level map;
 
 
         //Should probably have a better place for these,
@@ -60,7 +60,8 @@ namespace NotAMetroidGame
             camera = new Camera();
             testEnemy = new Skeleton(Content);
             player = new Player(Content);
-            map = new Map();
+            map = new TestLevel();
+            map.InitMap(Content);
             // TODO: use this.Content to load your game content here
 
         }
@@ -102,7 +103,7 @@ namespace NotAMetroidGame
                 player.attacking = true;
 
             OldKeyState = kstate;
-            player.Update(gameTime);
+            player.Update(gameTime, map);
 
             // If attacking and attack boundingbox is intersecting the enemy
             if (player.Attack(gameTime) && player.hit.Intersects(testEnemy.bound))
@@ -155,6 +156,7 @@ namespace NotAMetroidGame
             {
                 camera.position.Y = map.bottom - 600;
             }
+            map.Update(gameTime, camera);
 
             base.Update(gameTime);
         }
@@ -171,8 +173,10 @@ namespace NotAMetroidGame
 
             spriteBatch.Begin();
 
+            map.Draw(spriteBatch);
             spriteBatch.Draw(testEnemy.sprite, Vector2.Subtract(testEnemy.position, camera.position), testEnemy.tint);
             spriteBatch.Draw(player.sprite, Vector2.Subtract(player.position, camera.position), null, Color.White, 0, Vector2.Zero, 0.23f, SpriteEffects.None, 0f);
+
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -8,9 +8,6 @@ namespace NotAMetroidGame
 {
     public class Player : Creature
     {
-        //using skeleton sprite for now
-        private static string SPRITE = "orc_skeleton_single";
-
         //keeps track of elapsed time since start of an attack
         private float attackTimer;
 
@@ -19,6 +16,9 @@ namespace NotAMetroidGame
 
         //bounding box of attack
         public BoundingBox hit;
+
+        public float width = 103.5f;
+        public float height = 103.5f;
 
         //Jump modifiers
         protected float fallMult = 2.5f;
@@ -59,7 +59,7 @@ namespace NotAMetroidGame
             }
         }
 
-        public override void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, Level map)
         {
             base.Update(gameTime);
 
@@ -73,11 +73,11 @@ namespace NotAMetroidGame
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (shortJump - 1));
             }
 
-            if (this.position.Y >= 385)
+            if (this.position.Y >= 408.5)
             {
-                Debug.WriteLine("Grounded");
+                //Debug.WriteLine("Grounded");
                 this.velocity = Vector2.Zero;
-                this.position.Y = 385;
+                this.position.Y = 408.5f;
             }
         }
 

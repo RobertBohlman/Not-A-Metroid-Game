@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace NotAMetroidGame
 {
@@ -26,8 +27,15 @@ namespace NotAMetroidGame
             height = 600;
         }
 
-        public void Update(Vector2 newPosition)
+        public void Update(Vector2 newPosition, GraphicsDeviceManager graphics)
         {
+            int bufferHeight = graphics.GraphicsDevice.PresentationParameters.BackBufferHeight;
+            int bufferWidth = graphics.GraphicsDevice.PresentationParameters.BackBufferWidth;
+            if (height != bufferHeight || width != bufferWidth)
+            {
+                height = bufferHeight;
+                width = bufferWidth;
+            }
             position = Vector2.Subtract(newPosition, new Vector2(width / 2, height / 2));
         }
     }

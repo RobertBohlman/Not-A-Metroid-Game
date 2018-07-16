@@ -59,9 +59,10 @@ namespace NotAMetroidGame
         public virtual void Update(GameTime gameTime)
         {
             //Debug.WriteLine("V: " + this.velocity);
-           // Debug.WriteLine("P: " + this.position);
+            //Debug.WriteLine("P: " + this.position);
             //Debug.WriteLine("P: " + this.position);
 
+            this.prevPosition = new Vector2(this.position.X, this.position.Y);
             this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
             this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
 

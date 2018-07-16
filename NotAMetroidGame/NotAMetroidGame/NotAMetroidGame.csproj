@@ -42,12 +42,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <Compile Include="Animation.cs" />
     <Compile Include="AnimationFrame.cs" />
-=======
     <Compile Include="Camera.cs" />
->>>>>>> 191465d9a5872489e1b5750ff77f500c4cf902ee
     <Compile Include="Creature.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Game1.cs" />

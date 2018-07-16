@@ -32,8 +32,8 @@ namespace NotAMetroidGame
         {
             left = 0;
             top = 0;
-            right = (levelWidth+1) * TILE_SIZE;
-            bottom = (levelHeight+1) * TILE_SIZE;
+            right = (levelWidth) * TILE_SIZE;
+            bottom = (levelHeight) * TILE_SIZE;
             grid = new Structure[levelWidth, levelHeight];
         }
 
@@ -45,19 +45,65 @@ namespace NotAMetroidGame
                 for (int y = 0; y < levelHeight; y++)
                 {
                     if (y >= levelHeight - 2)
-                        grid[x, y] = new TestFloor(content);
+                        grid[x, y] = new TestFloor(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
                     else
-                        grid[x, y] = new Air();
+                        grid[x, y] = new Air(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
                 }
             }
         }
 
+        public Structure[] GetTiles(Rectangle area)
+        {
+            int areaX = area.X / TILE_SIZE;
+            int areaY = area.Y / TILE_SIZE;
+            int areaWidth = areaX + (area.Width / TILE_SIZE);
+            int areaHeight = areaY + (area.Height / TILE_SIZE);
+
+            if (areaWidth > grid.GetLength(0) - 1)
+                areaWidth = grid.GetLength(0) - 1;
+            if (areaHeight > grid.GetLength(1) - 1)
+                areaHeight = grid.GetLength(1) - 1;
+            int numTiles = (areaWidth - areaX + 1) * (areaHeight - areaY + 1);
+            if (numTiles < 0) numTiles = 0;
+            //Debug.WriteLine(numTiles);
+            Structure[] tiles = new Structure[numTiles];
+            int index = 0;
+            for (int i = areaX; i <= areaWidth; i++)
+            {
+                for (int j = areaY; j <= areaHeight; j++)
+                {
+                    if (grid[i,j].solid == true)
+                    {
+                        tiles[index] = grid[i, j];
+                        index++;
+                    }
+                }
+            }
+            return tiles;
+        }
+
         public void Update(GameTime gametime, Camera camera)
         {
+            if (camera.position.X < left)
+            {
+                camera.position.X = left;
+            }
+            if (camera.position.X > right - camera.width)
+            {
+                camera.position.X = right - camera.width;
+            }
+            if (camera.position.Y < top)
+            {
+                camera.position.Y = top;
+            }
+            if (camera.position.Y > bottom - camera.height)
+            {
+                camera.position.Y = bottom - camera.height;
+            }
             drawPosX = (int)(camera.position.X / TILE_SIZE);
-            drawPosWidth = drawPosX + (int)(camera.width / TILE_SIZE);
+            drawPosWidth = drawPosX + (int)(camera.width / TILE_SIZE) + 1;
             drawPosY = (int)(camera.position.Y / TILE_SIZE);
-            drawPosHeight = drawPosY + (int)(camera.height / TILE_SIZE);
+            drawPosHeight = drawPosY + (int)(camera.height / TILE_SIZE) + 1;
             offset = new Vector2(camera.position.X % TILE_SIZE, camera.position.Y % TILE_SIZE);
             cameraPos = camera.position;
         }
@@ -108,9 +154,9 @@ namespace NotAMetroidGame
                 for (int y = 0; y < levelHeight; y++)
                 {
                     if (y >= levelHeight - 2)
-                        grid[x, y] = new TestFloor(content);
+                        grid[x, y] = new TestFloor(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
                     else
-                        grid[x, y] = new Air();
+                        grid[x, y] = new Air(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
                 }
             }
         }

@@ -37,11 +37,8 @@
 /processorParam:TextureFormat=Color
 /build:rsz_photo_1.jpg
 
-<<<<<<< HEAD
+
 #begin sprite_base_addon_2012_12_14.png
-=======
-#begin test_background.png
->>>>>>> 191465d9a5872489e1b5750ff77f500c4cf902ee
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -51,9 +48,18 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-<<<<<<< HEAD
 /build:sprite_base_addon_2012_12_14.png
-=======
+
+#begin test_background.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
 /build:test_background.png
 
 #begin test_floor.png
@@ -67,5 +73,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:test_floor.png
->>>>>>> 191465d9a5872489e1b5750ff77f500c4cf902ee
 

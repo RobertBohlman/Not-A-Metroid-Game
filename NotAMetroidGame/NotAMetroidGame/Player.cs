@@ -35,7 +35,7 @@ namespace NotAMetroidGame
             //Init placeholder image
             this.sprite = sprite = content.Load<Texture2D>("sprite_base_addon_2012_12_14");
             attacking = false;
-            this.position = new Vector2(10, 380);
+            this.position = new Vector2(10, 10);
             this.velocity = new Vector2(0, 0);
 
             //Animation setup
@@ -111,11 +111,58 @@ namespace NotAMetroidGame
                 fall.Update(gameTime);
             }
 
-            if (this.position.Y >= 408.5)
+
+            Rectangle collisionArea = new Rectangle();
+            collisionArea.X = Math.Max((int)this.position.X, (int)this.prevPosition.X);
+            collisionArea.Y = Math.Max((int)this.position.Y, (int)this.prevPosition.Y);
+            collisionArea.Width = Math.Abs((int)(this.position.X - this.prevPosition.X)) + (int) this.width;
+            collisionArea.Height = Math.Abs((int)(this.position.Y - this.prevPosition.Y)) + (int)this.height;
+            //Debug.WriteLine(collisionArea.X + " " + collisionArea.Y + " ");
+            Structure[] obstacles = map.GetTiles(collisionArea);
+
+            int xDirection = 0;
+            if (this.position.X < this.prevPosition.X)
+            {
+                xDirection = -1;
+            } else if (this.position.X > this.prevPosition.X)
+            {
+                xDirection = 1;
+            }
+            int yDirection = 0;
+            if (this.position.Y < this.prevPosition.Y)
+            {
+                yDirection = -1;
+            }
+            else if (this.position.Y > this.prevPosition.Y)
+            {
+                yDirection = 1;
+            }
+            for (int i = 0; i < obstacles.GetLength(0) && obstacles[i] != null; i++)
+            {
+                //Debug.WriteLine(i);
+                if (yDirection > 0 && this.bound.Intersects(obstacles[i].bound))
+                {
+                    this.position.Y = (float)(obstacles[i].position.Y - this.height);
+                    //this.position.Y = 500f;
+                    this.velocity = Vector2.Zero;
+                }
+            }
+            /*
+            if (this.position.Y >= 500)
             {
                 //Debug.WriteLine("Grounded");
                 this.velocity = Vector2.Zero;
-                this.position.Y = 408.5f;
+                this.position.Y = 500f;
+            }
+            */
+
+            if (this.position.X < map.left)
+            {
+                this.position.X = map.left;
+            }
+            if (this.position.X > map.right - width)
+            {
+                this.position.X = map.right - width;
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Right) && this.position.Y >= 385)
@@ -135,6 +182,7 @@ namespace NotAMetroidGame
                 currentAnimation = idle;
                 idle.Update(gameTime);
             }
+            Debug.WriteLine(position.X + "," + position.Y);
         }
 
         public override void Action(GameTime gameTime)

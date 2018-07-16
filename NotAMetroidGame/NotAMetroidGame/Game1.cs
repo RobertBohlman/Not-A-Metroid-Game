@@ -83,7 +83,7 @@ namespace NotAMetroidGame
 
             if (enemy.bound.Intersects(player.bound) && !player.invuln)
             {
-                Debug.WriteLine("Collision");
+                //Debug.WriteLine("Collision");
                 Vector2 newVel = player.velocity;
                
 
@@ -105,7 +105,7 @@ namespace NotAMetroidGame
             }
             else
             {
-                Debug.WriteLine("No Collision");
+                //Debug.WriteLine("No Collision");
             }
 
             var kstate = Keyboard.GetState();

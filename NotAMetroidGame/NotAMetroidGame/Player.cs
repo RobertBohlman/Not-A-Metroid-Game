@@ -68,6 +68,8 @@ namespace NotAMetroidGame
             hurt.AddFrame(new Rectangle(148, 280, 20, 30), TimeSpan.FromSeconds(1));
 
             currentAnimation = idle;
+
+            this.speedCap = 250;
         }
 
         /**

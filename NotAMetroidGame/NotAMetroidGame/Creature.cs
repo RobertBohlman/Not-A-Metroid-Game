@@ -25,6 +25,9 @@ namespace NotAMetroidGame
         //Time since invulnerability period started
         public int invulnTimer;
 
+        //Cap for horizontal speed.
+        public int speedCap;
+
         public Creature()
         {
         }
@@ -69,8 +72,18 @@ namespace NotAMetroidGame
          **/
         public virtual void Update(GameTime gameTime)
         {
-            //Debug.WriteLine("V: " + this.velocity);
-           // Debug.WriteLine("P: " + this.position);
+            Debug.WriteLine(this.velocity);
+            if (Math.Abs(this.velocity.X) > this.speedCap)
+            {
+                if (this.velocity.X > 0)
+                {
+                    this.velocity.X = speedCap;
+                }
+                else
+                {
+                    this.velocity.X = speedCap * -1;
+                }
+            }
             this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
             this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
 
@@ -79,10 +92,10 @@ namespace NotAMetroidGame
                 new Vector3(this.position.X + 37, this.position.Y + 60, 0));
 
             //This prevents acceleration/deceleration for crisp movement
-            if (!recoil)
-            {
-                this.velocity.X = 0;
-            }
+            //if (!recoil)
+            //{
+               // this.velocity.X = 0;
+            //}
             
 
             if (recoil)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace NotAMetroidGame
 {
@@ -12,6 +13,7 @@ namespace NotAMetroidGame
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Creature player;
+        Creature enemy;
 
         //Should probably have a better place for these,
         //maybe an enum class?
@@ -53,6 +55,7 @@ namespace NotAMetroidGame
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             player = new Player(Content);
+            enemy = new Skeleton(Content);
             // TODO: use this.Content to load your game content here
 
         }
@@ -78,19 +81,47 @@ namespace NotAMetroidGame
 
             // TODO: Add your update logic here
 
+            if (enemy.bound.Intersects(player.bound) && !player.invuln)
+            {
+                Debug.WriteLine("Collision");
+                Vector2 newVel = player.velocity;
+               
+
+                player.recoil = true;
+                player.invuln = true;
+
+                //Using a hardcoded value here, but considering
+                //implementing some kind of flag for if a creature 
+                //is grounded.
+                if (player.velocity.Y > 0)
+                {
+                    if (player.getFacing() == 0)
+                        newVel.X = -450;
+                    else if (player.getFacing() == 1)
+                        newVel.X = 450; 
+                    newVel.Y = -800;
+                }
+                player.velocity = newVel; 
+            }
+            else
+            {
+                Debug.WriteLine("No Collision");
+            }
+
             var kstate = Keyboard.GetState();
 
-            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.position.Y >= 385)
+            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.position.Y >= 385 && !player.recoil)
                 player.Move(JUMP, gameTime);
 
-            if (kstate.IsKeyDown(Keys.Right))
+            if (kstate.IsKeyDown(Keys.Right) && !player.recoil)
                 player.Move(RIGHT, gameTime);
 
-            if (kstate.IsKeyDown(Keys.Left))
+            if (kstate.IsKeyDown(Keys.Left) && !player.recoil)
                 player.Move(LEFT, gameTime);
 
             OldKeyState = kstate;
             player.Update(gameTime);
+            enemy.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -106,6 +137,7 @@ namespace NotAMetroidGame
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             player.Draw(spriteBatch);
+            enemy.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);

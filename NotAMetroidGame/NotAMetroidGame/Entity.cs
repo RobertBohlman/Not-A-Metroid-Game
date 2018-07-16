@@ -28,6 +28,11 @@ namespace NotAMetroidGame
         {
         }
 
+        public int getFacing()
+        {
+            return this.facing;
+        }
+
         /**[NOTE]: This is likely to be removed 
          * 
          * Draw the entity on screen.
@@ -40,7 +45,7 @@ namespace NotAMetroidGame
          *  I'm not sure if there's a better way to draw frames of animation (there probably is)
          *  As a result, this will probably get revised slightly.
          **/
-        public void Draw(SpriteBatch spriteBatch)
+        public virtual void Draw(SpriteBatch spriteBatch)
         {
 
             //spriteBatch.Draw(this.sprite, this.position, null, Color.White, 0, Vector2.Zero, 0.23f, SpriteEffects.None, 0f);
@@ -48,15 +53,16 @@ namespace NotAMetroidGame
 
             var sourceRectangle = currentAnimation.CurrentRectangle;
             Vector2 scaleVector = new Vector2(2.0f, 2.0f);
-            Debug.WriteLine(sourceRectangle.X);
-            Debug.WriteLine(sourceRectangle.Y);
             if (facing == 0)
             {
-                spriteBatch.Draw(sprite, position, null, sourceRectangle, Vector2.Zero, 0, scaleVector, Color.White, SpriteEffects.None, 0f);
+                //spriteBatch.Draw(sprite, position, null, sourceRectangle, Vector2.Zero, 0, scaleVector, Color.White, SpriteEffects.None, 0f);
+
+                spriteBatch.Draw(sprite, position, sourceRectangle, Color.White, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
             }
             else if (facing == 1)
             {
-                spriteBatch.Draw(sprite, position, null, sourceRectangle, Vector2.Zero, 0, scaleVector, Color.White, SpriteEffects.FlipHorizontally, 0f);
+                spriteBatch.Draw(sprite, position, sourceRectangle, Color.White, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                //spriteBatch.Draw(sprite, position, null, sourceRectangle, Vector2.Zero, 0, scaleVector, Color.White, SpriteEffects.FlipHorizontally, 0f);
             }
             
 

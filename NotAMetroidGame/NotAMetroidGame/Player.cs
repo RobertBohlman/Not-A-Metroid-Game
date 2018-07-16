@@ -17,6 +17,16 @@ namespace NotAMetroidGame
         Animation jump;
         Animation fall;
         Animation idle;
+        Animation hurt;
+
+        //in an attacking state or not
+        public bool attacking;
+
+        //keeps track of elapsed time since start of an attack
+        private float attackTimer;
+
+        //bounding box of attack
+        public BoundingBox hit;
 
         public Player(Microsoft.Xna.Framework.Content.ContentManager content)
         {
@@ -24,6 +34,9 @@ namespace NotAMetroidGame
             this.sprite = sprite = content.Load<Texture2D>("sprite_base_addon_2012_12_14");
             this.position = new Vector2(10, 380);
             this.velocity = new Vector2(0, 0);
+
+            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                new Vector3(this.position.X + 37, this.position.Y + 60, 0));
 
             //Animation setup
             walkRight = new Animation();
@@ -51,12 +64,43 @@ namespace NotAMetroidGame
             fall = new Animation();
             fall.AddFrame(new Rectangle(212, 149, 20, 30), TimeSpan.FromSeconds(1));
 
+            hurt = new Animation();
+            hurt.AddFrame(new Rectangle(148, 280, 20, 30), TimeSpan.FromSeconds(1));
+
             currentAnimation = idle;
+        }
+
+        /**
+        * (Likely to be altered or removed.  Used for boundingbox testing)
+        * Attack updates the attack bounding box.
+        * Returns whether or not the player is attacking.
+        */
+        public bool Attack(GameTime gameTime)
+        {
+            if (attacking)
+            {
+                attackTimer += gameTime.ElapsedGameTime.Milliseconds;
+                hit = new BoundingBox(new Vector3(this.position.X - 100, this.position.Y + 30, 0),
+                    new Vector3(this.position.X, this.position.Y + 40, 0));
+                if (attackTimer > 100)
+                {
+                    attacking = false;
+                    attackTimer = 0;
+                }
+                return true;
+
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+
 
             if (this.velocity.Y > 0)
             {
@@ -95,6 +139,12 @@ namespace NotAMetroidGame
             {
                 currentAnimation = idle;
                 idle.Update(gameTime);
+            }
+
+            if (this.recoil)
+            {
+                currentAnimation = hurt;
+                hurt.Update(gameTime);
             }
         }
 

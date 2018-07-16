@@ -13,6 +13,18 @@ namespace NotAMetroidGame
         //Reduces damage taken
         private int armor;
 
+        //recoil state after taking damage
+        public bool recoil;
+
+        //Time since last knocked by a hit
+        public int hitTimer;
+
+        //invulnerability state after recoil
+        public bool invuln;
+
+        //Time since invulnerability period started
+        public int invulnTimer;
+
         public Creature()
         {
         }
@@ -62,8 +74,41 @@ namespace NotAMetroidGame
             this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
             this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
 
+            // Updating bound.  Hard-coded values need to be removed.
+            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+
             //This prevents acceleration/deceleration for crisp movement
-            this.velocity.X = 0;
+            if (!recoil)
+            {
+                this.velocity.X = 0;
+            }
+            
+
+            if (recoil)
+            {
+                this.hitTimer += gameTime.ElapsedGameTime.Milliseconds;
+
+                if (hitTimer > 300 && this.position.Y >= 385)
+                {
+                    this.recoil = false;
+                    this.hitTimer = 0;
+                    
+                }
+            }
+
+            if (invuln)
+            {
+                this.invulnTimer += gameTime.ElapsedGameTime.Milliseconds;
+
+                if (invulnTimer > 1000)
+                {
+                    //Debug.WriteLine("Invuln ended");
+                    this.invuln = false;
+                    this.invulnTimer = 0;
+                }
+            }
+            
             
         }
 

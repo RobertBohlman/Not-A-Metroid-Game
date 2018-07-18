@@ -84,7 +84,7 @@ namespace NotAMetroidGame
             if (enemy.bound.Intersects(player.bound) && !player.invuln)
             {
                 //Debug.WriteLine("Collision");
-                Vector2 newVel = player.velocity;
+                Vector2 newVel = Vector2.Zero;
                
 
                 player.recoil = true;
@@ -117,6 +117,15 @@ namespace NotAMetroidGame
                 player.Move(RIGHT, gameTime);
 
             if (kstate.IsKeyDown(Keys.Left) && !player.recoil)
+                player.Move(LEFT, gameTime);
+
+            if (kstate.IsKeyDown(Keys.Space) && !player.recoil)
+                player.attack();
+
+            if (kstate.IsKeyUp(Keys.Left) && OldKeyState.IsKeyDown(Keys.Left))
+                player.Move(RIGHT, gameTime);
+
+            if (kstate.IsKeyUp(Keys.Right) && OldKeyState.IsKeyDown(Keys.Right))
                 player.Move(LEFT, gameTime);
 
             OldKeyState = kstate;

@@ -90,39 +90,6 @@ namespace NotAMetroidGame
             // Updating bound.  Hard-coded values need to be removed.
             bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
                 new Vector3(this.position.X + 37, this.position.Y + 60, 0));
-
-            //This prevents acceleration/deceleration for crisp movement
-            //if (!recoil)
-            //{
-               // this.velocity.X = 0;
-            //}
-            
-
-            if (recoil)
-            {
-                this.hitTimer += gameTime.ElapsedGameTime.Milliseconds;
-
-                if (hitTimer > 300 && this.position.Y >= 385)
-                {
-                    this.recoil = false;
-                    this.hitTimer = 0;
-                    
-                }
-            }
-
-            if (invuln)
-            {
-                this.invulnTimer += gameTime.ElapsedGameTime.Milliseconds;
-
-                if (invulnTimer > 1000)
-                {
-                    //Debug.WriteLine("Invuln ended");
-                    this.invuln = false;
-                    this.invulnTimer = 0;
-                }
-            }
-            
-            
         }
 
         /**Logic for enemy AI
@@ -130,6 +97,7 @@ namespace NotAMetroidGame
          * Called every update, determine if move/attack, etc.
          **/
         public abstract void Action(GameTime gameTime);
+        internal abstract bool Attack();
     }
 
 }

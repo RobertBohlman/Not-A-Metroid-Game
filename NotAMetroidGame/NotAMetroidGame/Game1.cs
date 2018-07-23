@@ -60,7 +60,7 @@ namespace NotAMetroidGame
             camera = new Camera();
             testEnemy = new Skeleton(Content);
             player = new Player(Content);
-            map = new TestLevel();
+            map = new Level();
             map.InitMap(Content);
             // TODO: use this.Content to load your game content here
 
@@ -89,7 +89,7 @@ namespace NotAMetroidGame
 
             var kstate = Keyboard.GetState();
 
-            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.position.Y >= 385)
+            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up))
                 player.Move(JUMP, gameTime);
 
             if (kstate.IsKeyDown(Keys.Right))

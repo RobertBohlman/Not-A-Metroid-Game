@@ -14,11 +14,15 @@ namespace NotAMetroidGame
         //in an attacking state or not
         public bool attacking;
 
+        public bool grounded;
+
         //bounding box of attack
         public BoundingBox hit;
 
-        public float width = 103.5f;
-        public float height = 103.5f;
+        public BoundingBox feet;
+
+        public float width = 16;
+        public float height = 64;
 
         //Jump modifiers
         protected float fallMult = 2.5f;
@@ -97,6 +101,9 @@ namespace NotAMetroidGame
         {
             base.Update(gameTime);
 
+            feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 64, 0),
+                new Vector3(this.position.X + 16, this.position.Y + 70, 0));
+
             if (this.velocity.Y > 0)
             {
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (fallMult - 1));
@@ -111,20 +118,63 @@ namespace NotAMetroidGame
                 fall.Update(gameTime);
             }
 
+            //check for collisions
+            Collision(map);
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) && grounded)
+            {
+                facing = 0;
+                currentAnimation = walkRight;
+                walkRight.Update(gameTime);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.Left) && grounded)
+            {
+                facing = 1;
+                currentAnimation = walkLeft;
+                walkLeft.Update(gameTime);
+            }
+            else if (grounded)
+            {
+                currentAnimation = idle;
+                idle.Update(gameTime);
+            }
+            //Debug.WriteLine(position.X + "," + position.Y);
+            Debug.WriteLine(this.velocity.Y);
+
+            //This was originally in the Creature code.  Moved here for testing.
+            this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
+        }
+
+        /*
+         * This function handles the complexities related to collisions. 
+         */
+        private void Collision(Level map)
+        {
+            // Keeps the player within the level boundaries
+            if (this.position.X < map.left)
+            {
+                this.position.X = map.left;
+            }
+            if (this.position.X > map.right - width)
+            {
+                this.position.X = map.right - width;
+            }
+
 
             Rectangle collisionArea = new Rectangle();
-            collisionArea.X = Math.Max((int)this.position.X, (int)this.prevPosition.X);
-            collisionArea.Y = Math.Max((int)this.position.Y, (int)this.prevPosition.Y);
-            collisionArea.Width = Math.Abs((int)(this.position.X - this.prevPosition.X)) + (int) this.width;
-            collisionArea.Height = Math.Abs((int)(this.position.Y - this.prevPosition.Y)) + (int)this.height;
+            collisionArea.X = Math.Min((int)this.position.X, (int)this.prevPosition.X) - 64;
+            collisionArea.Y = Math.Min((int)this.position.Y, (int)this.prevPosition.Y) - 64;
+            collisionArea.Width = Math.Abs((int)(this.position.X - this.prevPosition.X)) + (int)this.width + 64;
+            collisionArea.Height = Math.Abs((int)(this.position.Y - this.prevPosition.Y)) + (int)this.height + 64;
             //Debug.WriteLine(collisionArea.X + " " + collisionArea.Y + " ");
-            Structure[] obstacles = map.GetTiles(collisionArea);
+            Object[] obstacles = map.GetTiles(collisionArea);
 
             int xDirection = 0;
             if (this.position.X < this.prevPosition.X)
             {
                 xDirection = -1;
-            } else if (this.position.X > this.prevPosition.X)
+            }
+            else if (this.position.X > this.prevPosition.X)
             {
                 xDirection = 1;
             }
@@ -137,15 +187,28 @@ namespace NotAMetroidGame
             {
                 yDirection = 1;
             }
+            bool prevState = grounded;
+            grounded = false;
             for (int i = 0; i < obstacles.GetLength(0) && obstacles[i] != null; i++)
             {
                 //Debug.WriteLine(i);
-                if (yDirection > 0 && this.bound.Intersects(obstacles[i].bound))
+                Structure s = (Structure)obstacles[i];
+                if (this.bound.Intersects(s.bound))
                 {
-                    this.position.Y = (float)(obstacles[i].position.Y - this.height);
-                    //this.position.Y = 500f;
-                    this.velocity = Vector2.Zero;
+                    if (yDirection > 0
+                        && (this.prevPosition.Y + 50 < s.position.Y || prevState))
+                    {
+                        this.position.Y = (float)(s.position.Y - 60);
+                        this.velocity = Vector2.Zero;
+                        grounded = true;
+                    }
+
+                    else if (xDirection > 0)
+                        this.position.X = s.position.X - this.width;
+                    else if (xDirection < 0)
+                        this.position.X = s.position.X + 64;
                 }
+
             }
             /*
             if (this.position.Y >= 500)
@@ -155,34 +218,6 @@ namespace NotAMetroidGame
                 this.position.Y = 500f;
             }
             */
-
-            if (this.position.X < map.left)
-            {
-                this.position.X = map.left;
-            }
-            if (this.position.X > map.right - width)
-            {
-                this.position.X = map.right - width;
-            }
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Right) && this.position.Y >= 385)
-            {
-                facing = 0;
-                currentAnimation = walkRight;
-                walkRight.Update(gameTime);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.Left) && this.position.Y >= 385)
-            {
-                facing = 1;
-                currentAnimation = walkLeft;
-                walkLeft.Update(gameTime);
-            }
-            else if (this.position.Y >= 385)
-            {
-                currentAnimation = idle;
-                idle.Update(gameTime);
-            }
-            Debug.WriteLine(position.X + "," + position.Y);
         }
 
         public override void Action(GameTime gameTime)

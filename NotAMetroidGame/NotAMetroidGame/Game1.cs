@@ -12,7 +12,7 @@ namespace NotAMetroidGame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Creature player;
+        Player player;
         Creature enemy;
 
         //Should probably have a better place for these,
@@ -81,6 +81,42 @@ namespace NotAMetroidGame
 
             // TODO: Add your update logic here
 
+            var kstate = Keyboard.GetState();
+
+            if (kstate.IsKeyDown(Keys.Right) && !player.recoil && (!player.Grounded() || !player.attacking))
+                player.Move(RIGHT, gameTime);
+
+            if (kstate.IsKeyDown(Keys.Left) && !player.recoil && (!player.Grounded() || !player.attacking))
+                player.Move(LEFT, gameTime);
+
+            if (!player.attacking)
+            {
+                if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.position.Y >= 385 && !player.recoil)
+                    player.Move(JUMP, gameTime);
+
+                if (kstate.IsKeyDown(Keys.Space) && !player.recoil)
+                    player.Attack(gameTime);
+
+                if (kstate.IsKeyUp(Keys.Left) && OldKeyState.IsKeyDown(Keys.Left))
+                    player.Move(RIGHT, gameTime);
+
+                if (kstate.IsKeyUp(Keys.Right) && OldKeyState.IsKeyDown(Keys.Right))
+                    player.Move(LEFT, gameTime);
+            }
+
+            OldKeyState = kstate;
+            player.Update(gameTime, player);
+            enemy.Update(gameTime, player);
+
+            if (player.attacking && player.hit.Intersects(enemy.bound))
+            {
+                Debug.WriteLine("HIT");
+            }
+            else
+            {
+                Debug.WriteLine("");
+            }
+
             if (enemy.bound.Intersects(player.bound) && !player.invuln)
             {
                 //Debug.WriteLine("Collision");
@@ -90,9 +126,6 @@ namespace NotAMetroidGame
                 player.recoil = true;
                 player.invuln = true;
 
-                //Using a hardcoded value here, but considering
-                //implementing some kind of flag for if a creature 
-                //is grounded.
                 if (player.velocity.Y > 0)
                 {
                     if (player.getFacing() == 0)
@@ -107,30 +140,6 @@ namespace NotAMetroidGame
             {
                 //Debug.WriteLine("No Collision");
             }
-
-            var kstate = Keyboard.GetState();
-
-            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.position.Y >= 385 && !player.recoil)
-                player.Move(JUMP, gameTime);
-
-            if (kstate.IsKeyDown(Keys.Right) && !player.recoil)
-                player.Move(RIGHT, gameTime);
-
-            if (kstate.IsKeyDown(Keys.Left) && !player.recoil)
-                player.Move(LEFT, gameTime);
-
-            if (kstate.IsKeyDown(Keys.Space) && !player.recoil)
-                player.attack();
-
-            if (kstate.IsKeyUp(Keys.Left) && OldKeyState.IsKeyDown(Keys.Left))
-                player.Move(RIGHT, gameTime);
-
-            if (kstate.IsKeyUp(Keys.Right) && OldKeyState.IsKeyDown(Keys.Right))
-                player.Move(LEFT, gameTime);
-
-            OldKeyState = kstate;
-            player.Update(gameTime);
-            enemy.Update(gameTime);
 
             base.Update(gameTime);
         }

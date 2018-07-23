@@ -70,9 +70,8 @@ namespace NotAMetroidGame
          * 
          * Player and other enemies with abnormal movement will override this method
          **/
-        public virtual void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime, Player player)
         {
-            Debug.WriteLine(this.velocity);
             if (Math.Abs(this.velocity.X) > this.speedCap)
             {
                 if (this.velocity.X > 0)
@@ -92,12 +91,18 @@ namespace NotAMetroidGame
                 new Vector3(this.position.X + 37, this.position.Y + 60, 0));
         }
 
+        //Checks if the creature is standing on something. Hard coded for now.
+        public bool Grounded()
+        {
+            return this.position.Y >= 385;
+        }
+
         /**Logic for enemy AI
          * 
          * Called every update, determine if move/attack, etc.
          **/
-        public abstract void Action(GameTime gameTime);
-        internal abstract bool Attack();
+        public abstract void Action(GameTime gameTime, Player player);
+        //internal abstract bool Attack();
     }
 
 }

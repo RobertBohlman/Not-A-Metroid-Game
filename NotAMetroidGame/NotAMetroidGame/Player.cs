@@ -18,6 +18,7 @@ namespace NotAMetroidGame
         Animation fall;
         Animation idle;
         Animation hurt;
+        Animation attack;
 
         //in an attacking state or not
         public bool attacking;
@@ -37,6 +38,8 @@ namespace NotAMetroidGame
             this.swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
             this.position = new Vector2(10, 380);
             this.velocity = new Vector2(0, 0);
+
+            attacking = false;
 
             bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
                 new Vector3(this.position.X + 37, this.position.Y + 60, 0));
@@ -70,6 +73,14 @@ namespace NotAMetroidGame
             hurt = new Animation();
             hurt.AddFrame(new Rectangle(148, 280, 20, 30), TimeSpan.FromSeconds(1));
 
+            attack = new Animation();
+            attack.AddFrame(new Rectangle(20, 728, 27, 30), TimeSpan.FromSeconds(0.05));
+            attack.AddFrame(new Rectangle(84, 728, 27, 30), TimeSpan.FromSeconds(0.15));
+            attack.AddFrame(new Rectangle(148, 728, 27, 30), TimeSpan.FromSeconds(0.25));
+            attack.AddFrame(new Rectangle(212, 728, 27, 30), TimeSpan.FromSeconds(0.25));
+            attack.AddFrame(new Rectangle(276, 728, 27, 30), TimeSpan.FromSeconds(0.15));
+            attack.AddFrame(new Rectangle(340, 728, 27, 30), TimeSpan.FromSeconds(0.05));
+
             currentAnimation = idle;
 
             this.speedCap = 250;
@@ -80,42 +91,21 @@ namespace NotAMetroidGame
         * Attack updates the attack bounding box.
         * Returns whether or not the player is attacking.
         */
-        public override bool Attack(GameTime gameTime)
+        public void Attack(GameTime gameTime)
         {
-            if (attacking)
+            if (!attacking)
             {
-                attackTimer += gameTime.ElapsedGameTime.Milliseconds;
-                if (facing == 1)
-                {
-                    hit = new BoundingBox(new Vector3(this.position.X + 37, this.position.Y + 20, 0),
-                        new Vector3(this.position.X + 109, this.position.Y + 40, 0));
-                }
-                else
-                {
-                    hit = new BoundingBox(new Vector3(this.position.X, this.position.Y + 20, 0),
-                        new Vector3(this.position.X - 72, this.position.Y + 40, 0));
-                }
+                attacking = true;
                 
-                if (attackTimer > 100)
-                {
-                    attacking = false;
-                    attackTimer = 0;
-                }
-                return true;
-
-            }
-            else
-            {
-                return false;
             }
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime, Player player)
         {
-            base.Update(gameTime);
+            base.Update(gameTime, player);
+            //Debug.WriteLine(this.position);
 
-
-
+            //Gravity and jump handling
             if (this.velocity.Y > 0)
             {
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (fallMult - 1));
@@ -130,13 +120,15 @@ namespace NotAMetroidGame
                 fall.Update(gameTime);
             }
 
-            if (this.position.Y >= 385)
+            //Hard coded floor
+            if (this.Grounded())
             {
                 //Debug.WriteLine("Grounded");
                 this.velocity.Y = 0;
                 this.position.Y = 385;
             }
 
+            //Recoil and invulnerability timers
             if (recoil)
             {
                 if (this.position.Y >= 385)
@@ -166,6 +158,34 @@ namespace NotAMetroidGame
                 }
             }
 
+            //Attack code
+            if (attacking)
+            {
+                //Default behavior is for the player to stand still while attacking if they're on the ground
+                if (position.Y >= 385)
+                    velocity.X = 0;
+
+                attackTimer += gameTime.ElapsedGameTime.Milliseconds;
+                if (facing == 0)
+                {
+                    hit = new BoundingBox(new Vector3(this.position.X + 37, this.position.Y + 20, 0),
+                        new Vector3(this.position.X + 106, this.position.Y + 40, 0));
+                }
+                else
+                {
+                    hit = new BoundingBox(new Vector3(this.position.X - 62, this.position.Y + 20, 0),
+                        new Vector3(this.position.X, this.position.Y + 40, 0));
+                }
+
+                if (attackTimer > 800)
+                {
+                    attacking = false;
+                    attackTimer = 0;
+                }
+
+            }
+
+            //Animations
             if (Keyboard.GetState().IsKeyDown(Keys.Right) && this.position.Y >= 385)
             {
                 facing = 0;
@@ -184,6 +204,16 @@ namespace NotAMetroidGame
                 idle.Update(gameTime);
             }
 
+            if (attacking)
+            {
+                currentAnimation = attack;
+                attack.Update(gameTime);
+            }
+            else
+            {
+                attack.Reset();
+            }
+
             if (this.recoil)
             {
                 currentAnimation = hurt;
@@ -200,17 +230,17 @@ namespace NotAMetroidGame
                 if (this.facing == 0)
                 {
                     spriteBatch.Draw(swordSprite, new Vector2(this.position.X + 37, this.position.Y + 20), null, Color.White,
-                        0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.FlipHorizontally, 0);
+                        0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.None, 0);
                 }
                 else
                 {
-                    spriteBatch.Draw(swordSprite, new Vector2(this.position.X + 37, this.position.Y + 20), null, Color.White, 
-                        0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.None, 0);
+                    spriteBatch.Draw(swordSprite, new Vector2(this.position.X - 62, this.position.Y + 20), null, Color.White, 
+                        0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.FlipHorizontally, 0);
                 }
             }
         }
 
-        public override void Action(GameTime gameTime)
+        public override void Action(GameTime gameTime, Player player)
         {
             throw new NotImplementedException();
         }

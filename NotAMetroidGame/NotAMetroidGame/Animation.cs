@@ -47,6 +47,12 @@ namespace NotAMetroidGame
             timeIntoAnimation = TimeSpan.FromSeconds(remainder);
         }
 
+        //Resets this animation to its first frame
+        public void Reset()
+        {
+            timeIntoAnimation = TimeSpan.Zero;
+        }
+
         public Rectangle CurrentRectangle
         {
             get

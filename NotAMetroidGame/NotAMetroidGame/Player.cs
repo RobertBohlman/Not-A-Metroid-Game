@@ -34,16 +34,7 @@ namespace NotAMetroidGame
         Animation hurt;
         Animation attack;
 
-        //in an attacking state or not
-        public bool attacking;
-
-        //keeps track of elapsed time since start of an attack
-        private float attackTimer;
-
         public Texture2D swordSprite;
-
-        //bounding box of attack
-        public BoundingBox hit;
 
         public Player(Microsoft.Xna.Framework.Content.ContentManager content)
         {
@@ -121,7 +112,7 @@ namespace NotAMetroidGame
 
         public override void Update(GameTime gameTime, Level map, Player player)
         {
-            base.Update(gameTime, player);
+            base.Update(gameTime, map, player);
             
             feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 64, 0),
                 new Vector3(this.position.X + 16, this.position.Y + 70, 0));
@@ -311,7 +302,7 @@ namespace NotAMetroidGame
 
         public override void Draw(SpriteBatch spriteBatch, Camera camera)
         {
-            base.Draw(spriteBatch);
+            base.Draw(spriteBatch, camera);
 
             if (attacking)
             {

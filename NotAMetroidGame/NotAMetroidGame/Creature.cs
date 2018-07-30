@@ -78,7 +78,7 @@ namespace NotAMetroidGame
          * 
          * Player and other enemies with abnormal movement will override this method
          **/
-        public virtual void Update(GameTime gameTime, Player player)
+        public virtual void Update(GameTime gameTime, Level map, Player player)
         {
             this.prevPosition = new Vector2(this.position.X, this.position.Y);
             

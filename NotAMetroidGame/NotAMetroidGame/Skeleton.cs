@@ -120,10 +120,10 @@ namespace NotAMetroidGame
 
         }
 
-        public override void Update(GameTime gameTime, Player player)
+        public override void Update(GameTime gameTime, Level map, Player player)
         {
 
-            base.Update(gameTime, player);
+            base.Update(gameTime, map, player);
 
             //Hard coded floor
             if (this.Grounded())
@@ -184,11 +184,11 @@ namespace NotAMetroidGame
             
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch, Camera camera)
         {
 
             //spriteBatch.Draw(this.sprite, this.position, null, Color.White, 0, Vector2.Zero, 0.23f, SpriteEffects.None, 0f);
-            base.Draw(spriteBatch);
+            base.Draw(spriteBatch, camera);
 
             if (String.Equals(currentAnimation.getFrameName(), "swing"))
             {

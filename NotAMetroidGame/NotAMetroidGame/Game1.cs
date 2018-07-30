@@ -13,10 +13,9 @@ namespace NotAMetroidGame
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Camera camera;
-        Creature testEnemy;
-        Player player;
         Level map;
-
+        Player player;
+        Creature enemy;
 
         //Should probably have a better place for these,
         //maybe an enum class?
@@ -58,10 +57,11 @@ namespace NotAMetroidGame
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             camera = new Camera();
-            testEnemy = new Skeleton(Content);
+            enemy = new Skeleton(Content);
             player = new Player(Content);
             map = new Level();
             map.InitMap(Content);
+
             // TODO: use this.Content to load your game content here
 
         }
@@ -82,40 +82,55 @@ namespace NotAMetroidGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
-
+            //Player controls
             var kstate = Keyboard.GetState();
-
-            if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up))
-                player.Move(JUMP, gameTime);
-
-            if (kstate.IsKeyDown(Keys.Right))
-                player.Move(RIGHT, gameTime);
-
-            if (kstate.IsKeyDown(Keys.Left))
-                player.Move(LEFT, gameTime);
-
-            // Used to test attacking
-            if (kstate.IsKeyDown(Keys.Z))
-                player.attacking = true;
-
-            OldKeyState = kstate;
-            player.Update(gameTime, map);
-
-            // If attacking and attack boundingbox is intersecting the enemy
-            if (player.Attack(gameTime) && player.hit.Intersects(testEnemy.bound))
+            
+            if (kstate.IsKeyDown(Keys.Right) && !player.recoil && (!player.Grounded() || !player.attacking))
             {
-                Debug.WriteLine("HIT");
-                testEnemy.Die();
+                player.SetFacing(0);
+                player.Move(RIGHT, gameTime);
             }
 
-            camera.Update(player.position, graphics);
+            if (kstate.IsKeyDown(Keys.Left) && !player.recoil && (!player.Grounded() || !player.attacking))
+            {
+                player.SetFacing(1);
+                player.Move(LEFT, gameTime);
+            }
+                
 
+            if (!player.attacking && !player.recoil)
+            {
+                if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.Grounded())
+                    player.Move(JUMP, gameTime);
+
+                if (kstate.IsKeyDown(Keys.Space))
+                    player.Attack(gameTime);
+
+                if (kstate.IsKeyUp(Keys.Left) && OldKeyState.IsKeyDown(Keys.Left))
+                    player.Move(RIGHT, gameTime);
+
+                if (kstate.IsKeyUp(Keys.Right) && OldKeyState.IsKeyDown(Keys.Right))
+                    player.Move(LEFT, gameTime);
+            }
+            OldKeyState = kstate;
+            player.Update(gameTime, map, player);
+            enemy.Update(gameTime, map, player);
+            camera.Update(player.position, graphics);
             map.Update(gameTime, camera);
 
+            //Player to enemy hit detection
+            if (player.attacking && player.hit.Intersects(enemy.bound))
+            {
+                Debug.WriteLine("HIT");
+            }
+
+            //Enemy to player hit detection.
+            if (enemy.bound.Intersects(player.bound) && !player.invuln)
+            {
+                player.Damage(0, true);
+            }
+
+            Debug.WriteLine("");
             base.Update(gameTime);
         }
 
@@ -131,7 +146,7 @@ namespace NotAMetroidGame
             spriteBatch.Begin();
             map.Draw(spriteBatch);
             player.Draw(spriteBatch, camera);
-            spriteBatch.Draw(testEnemy.sprite, Vector2.Subtract(testEnemy.position, camera.position), testEnemy.tint);
+            enemy.Draw(spriteBatch, camera);
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
@@ -12,6 +12,23 @@ namespace NotAMetroidGame
 
         //Reduces damage taken
         private int armor;
+
+        //recoil state after taking damage
+        public bool recoil;
+
+        //Time since last knocked by a hit
+        public int hitTimer;
+
+        //invulnerability state after recoil
+        public bool invuln;
+
+        //Time since invulnerability period started
+        public int invulnTimer;
+
+        //Cap for horizontal speed.
+        public int speedCap;
+        
+        protected bool grounded;
 
         public Creature()
         {
@@ -36,9 +53,14 @@ namespace NotAMetroidGame
          * Some enemies may have special effects or resistances when they take damage.
          * For this instance, that enemy can override this method.
          * 
+         * Takes the numerical damage as a long value, and a bool to
+         * determine if this causes the knockback/stun behavior (For player, enemies will knock them back
+         * but certain environmental hazards may not).
+         * 
          **/
-        public bool Damage(long damage)
+        public virtual bool Damage(long damage, bool knockback)
         {
+
             return false;
 
         }
@@ -56,31 +78,40 @@ namespace NotAMetroidGame
          * 
          * Player and other enemies with abnormal movement will override this method
          **/
-        public virtual void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime, Player player)
         {
-            //Debug.WriteLine("V: " + this.velocity);
-            //Debug.WriteLine("P: " + this.position);
-            //Debug.WriteLine("P: " + this.position);
-
             this.prevPosition = new Vector2(this.position.X, this.position.Y);
+            
+            if (Math.Abs(this.velocity.X) > this.speedCap)
+            {
+                if (this.velocity.X > 0)
+                {
+                    this.velocity.X = speedCap;
+                }
+                else
+                {
+                    this.velocity.X = speedCap * -1;
+                }
+            }
             this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
-            //this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
 
             // Updating bound.  Hard-coded values need to be removed.
             bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
                 new Vector3(this.position.X + 16, this.position.Y + 64, 0));
+        }
 
-            //This prevents acceleration/deceleration for crisp movement
-            this.velocity.X = 0;
-            
-
+        //Checks if the creature is standing on something. Hard coded for now.
+        public bool Grounded()
+        {
+            return this.grounded;
         }
 
         /**Logic for enemy AI
          * 
          * Called every update, determine if move/attack, etc.
          **/
-        public abstract void Action(GameTime gameTime);
+        public abstract void Action(GameTime gameTime, Player player);
+        //internal abstract bool Attack();
     }
 
 }

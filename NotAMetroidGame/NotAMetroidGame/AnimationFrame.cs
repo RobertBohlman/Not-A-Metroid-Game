@@ -5,7 +5,8 @@ namespace NotAMetroidGame
 {
     public class AnimationFrame
     {
-        public Rectangle SourceRectangle;
-        public TimeSpan Duration;
+        public Rectangle sourceRectangle;
+        public TimeSpan duration;
+        public String name;
     }
 }

@@ -113,8 +113,10 @@ namespace NotAMetroidGame
         public override void Update(GameTime gameTime, Level map, Player player)
         {
             base.Update(gameTime, map, player);
-            
-            feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 64, 0),
+            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                        new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+
+            feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 60, 0),
                 new Vector3(this.position.X + 16, this.position.Y + 70, 0));
                 
             if (velocity.Y > 0)
@@ -242,10 +244,10 @@ namespace NotAMetroidGame
 
 
             Rectangle collisionArea = new Rectangle();
-            collisionArea.X = Math.Min((int)this.position.X, (int)this.prevPosition.X) - 64;
-            collisionArea.Y = Math.Min((int)this.position.Y, (int)this.prevPosition.Y) - 64;
-            collisionArea.Width = Math.Abs((int)(this.position.X - this.prevPosition.X)) + (int)this.width + 64;
-            collisionArea.Height = Math.Abs((int)(this.position.Y - this.prevPosition.Y)) + (int)this.height + 64;
+            collisionArea.X = Math.Min((int)this.position.X, (int)this.prevPosition.X) - 128;
+            collisionArea.Y = Math.Min((int)this.position.Y, (int)this.prevPosition.Y) - 128;
+            collisionArea.Width = Math.Abs((int)(this.position.X - this.prevPosition.X)) + (int)this.width + 128;
+            collisionArea.Height = Math.Abs((int)(this.position.Y - this.prevPosition.Y)) + (int)this.height + 128;
             //Debug.WriteLine(collisionArea.X + " " + collisionArea.Y + " ");
             Object[] obstacles = map.GetTiles(collisionArea);
 
@@ -278,7 +280,7 @@ namespace NotAMetroidGame
                     if (yDirection > 0
                         && (this.prevPosition.Y + 50 < s.position.Y || prevState))
                     {
-                        this.position.Y = (float)(s.position.Y - 60);
+                        this.position.Y = (float)(s.position.Y - 64);
                         this.velocity = Vector2.Zero;
                         grounded = true;
                     }
@@ -287,6 +289,11 @@ namespace NotAMetroidGame
                         this.position.X = s.position.X - this.width;
                     else if (xDirection < 0)
                         this.position.X = s.position.X + 64;
+                }
+                else if (this.feet.Intersects(s.bound))
+                {
+                    this.velocity = Vector2.Zero;
+                    grounded = true;
                 }
 
             }

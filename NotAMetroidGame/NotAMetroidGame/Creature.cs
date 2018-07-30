@@ -94,6 +94,7 @@ namespace NotAMetroidGame
                 }
             }
             this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
+            this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
 
             // Updating bound.  Hard-coded values need to be removed.
             bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),

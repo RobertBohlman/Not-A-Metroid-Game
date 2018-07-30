@@ -124,7 +124,7 @@ namespace NotAMetroidGame
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (fallMult - 1));
                 currentAnimation = fall;
             }
-            else if (this.velocity.Y <= 0 && Keyboard.GetState().IsKeyUp(Keys.Up))
+            else if (this.velocity.Y < 0 && Keyboard.GetState().IsKeyUp(Keys.Up))
             {
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (shortJump - 1));
                 currentAnimation = fall;
@@ -144,7 +144,7 @@ namespace NotAMetroidGame
 
                 this.hitTimer += gameTime.ElapsedGameTime.Milliseconds;
 
-                if (hitTimer > 300 && this.position.Y >= 385)
+                if (hitTimer > 300 && this.grounded)
                 {
                     this.recoil = false;
                     this.hitTimer = 0;

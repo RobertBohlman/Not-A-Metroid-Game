@@ -58,7 +58,6 @@ namespace NotAMetroidGame
         {
 
             var sourceRectangle = currentAnimation.CurrentRectangle;
-            Vector2 scaleVector = new Vector2(2.0f, 2.0f);
             if (facing == 0)
             {
                 spriteBatch.Draw(sprite, Vector2.Subtract(position,camera.position), sourceRectangle, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);

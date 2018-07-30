@@ -18,19 +18,54 @@ namespace NotAMetroidGame
                 double totalSeconds = 0;
                 foreach (var frame in frames)
                 {
-                    totalSeconds += frame.Duration.TotalSeconds;
+                    totalSeconds += frame.duration.TotalSeconds;
                 }
 
                 return TimeSpan.FromSeconds(totalSeconds);
             }
         }
 
-        public void AddFrame(Rectangle rectangle, TimeSpan duration)
+        public String getFrameName()
+        {
+            AnimationFrame currentFrame = null;
+
+            TimeSpan accumulatedTime = TimeSpan.Zero;
+            foreach (var frame in frames)
+            {
+                if (accumulatedTime + frame.duration >= timeIntoAnimation)
+                {
+                    currentFrame = frame;
+                    break;
+                }
+                else
+                {
+                    accumulatedTime += frame.duration;
+                }
+            }
+
+            if (currentFrame == null)
+            {
+                Debug.WriteLine("Null rectangle");
+                currentFrame = frames.LastOrDefault();
+            }
+
+            if (currentFrame != null)
+            {
+                return currentFrame.name;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public void AddFrame(Rectangle rectangle, TimeSpan duration, String name)
         {
             AnimationFrame newFrame = new AnimationFrame()
             {
-                SourceRectangle = rectangle,
-                Duration = duration
+                sourceRectangle = rectangle,
+                duration = duration,
+                name = name
             };
 
             frames.Add(newFrame);
@@ -63,14 +98,14 @@ namespace NotAMetroidGame
                 TimeSpan accumulatedTime = TimeSpan.Zero;
                 foreach (var frame in frames)
                 {
-                    if (accumulatedTime + frame.Duration >= timeIntoAnimation)
+                    if (accumulatedTime + frame.duration >= timeIntoAnimation)
                     {
                         currentFrame = frame;
                         break;
                     }
                     else
                     {
-                        accumulatedTime += frame.Duration;
+                        accumulatedTime += frame.duration;
                     }
                 }
 
@@ -86,7 +121,7 @@ namespace NotAMetroidGame
                 // return an empty rectangle (one with no width or height)
                 if (currentFrame != null)
                 {
-                    return currentFrame.SourceRectangle;
+                    return currentFrame.sourceRectangle;
                 }
                 else
                 {

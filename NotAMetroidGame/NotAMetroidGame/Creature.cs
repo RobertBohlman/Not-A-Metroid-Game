@@ -51,9 +51,14 @@ namespace NotAMetroidGame
          * Some enemies may have special effects or resistances when they take damage.
          * For this instance, that enemy can override this method.
          * 
+         * Takes the numerical damage as a long value, and a bool to
+         * determine if this causes the knockback/stun behavior (For player, enemies will knock them back
+         * but certain environmental hazards may not).
+         * 
          **/
-        public bool Damage(long damage)
+        public virtual bool Damage(long damage, bool knockback)
         {
+
             return false;
 
         }

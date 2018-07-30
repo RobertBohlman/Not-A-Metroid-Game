@@ -76,25 +76,28 @@ namespace NotAMetroidGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
-
+            //Player controls
             var kstate = Keyboard.GetState();
 
             if (kstate.IsKeyDown(Keys.Right) && !player.recoil && (!player.Grounded() || !player.attacking))
+            {
+                player.SetFacing(0);
                 player.Move(RIGHT, gameTime);
+            }
 
             if (kstate.IsKeyDown(Keys.Left) && !player.recoil && (!player.Grounded() || !player.attacking))
-                player.Move(LEFT, gameTime);
-
-            if (!player.attacking)
             {
-                if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.position.Y >= 385 && !player.recoil)
+                player.SetFacing(1);
+                player.Move(LEFT, gameTime);
+            }
+                
+
+            if (!player.attacking && !player.recoil)
+            {
+                if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.Grounded())
                     player.Move(JUMP, gameTime);
 
-                if (kstate.IsKeyDown(Keys.Space) && !player.recoil)
+                if (kstate.IsKeyDown(Keys.Space))
                     player.Attack(gameTime);
 
                 if (kstate.IsKeyUp(Keys.Left) && OldKeyState.IsKeyDown(Keys.Left))
@@ -108,38 +111,19 @@ namespace NotAMetroidGame
             player.Update(gameTime, player);
             enemy.Update(gameTime, player);
 
+            //Player to enemy hit detection
             if (player.attacking && player.hit.Intersects(enemy.bound))
             {
                 Debug.WriteLine("HIT");
             }
-            else
-            {
-                Debug.WriteLine("");
-            }
 
+            //Enemy to player hit detection.
             if (enemy.bound.Intersects(player.bound) && !player.invuln)
             {
-                //Debug.WriteLine("Collision");
-                Vector2 newVel = Vector2.Zero;
-               
-
-                player.recoil = true;
-                player.invuln = true;
-
-                if (player.velocity.Y > 0)
-                {
-                    if (player.getFacing() == 0)
-                        newVel.X = -450;
-                    else if (player.getFacing() == 1)
-                        newVel.X = 450; 
-                    newVel.Y = -800;
-                }
-                player.velocity = newVel; 
+                player.Damage(0, true);
             }
-            else
-            {
-                //Debug.WriteLine("No Collision");
-            }
+
+            Debug.WriteLine("");
 
             base.Update(gameTime);
         }

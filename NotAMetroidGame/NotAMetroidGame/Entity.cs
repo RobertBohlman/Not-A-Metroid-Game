@@ -24,6 +24,10 @@ namespace NotAMetroidGame
 
         protected Animation currentAnimation;
 
+        protected Color tint;
+
+        protected Vector2 scaleVector;
+
         public Entity()
         {
         }
@@ -52,16 +56,15 @@ namespace NotAMetroidGame
            
 
             var sourceRectangle = currentAnimation.CurrentRectangle;
-            Vector2 scaleVector = new Vector2(2.0f, 2.0f);
             if (facing == 0)
             {
                 //spriteBatch.Draw(sprite, position, null, sourceRectangle, Vector2.Zero, 0, scaleVector, Color.White, SpriteEffects.None, 0f);
 
-                spriteBatch.Draw(sprite, position, sourceRectangle, Color.White, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                spriteBatch.Draw(sprite, position, sourceRectangle, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
             }
             else if (facing == 1)
             {
-                spriteBatch.Draw(sprite, position, sourceRectangle, Color.White, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                spriteBatch.Draw(sprite, position, sourceRectangle, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
                 //spriteBatch.Draw(sprite, position, null, sourceRectangle, Vector2.Zero, 0, scaleVector, Color.White, SpriteEffects.FlipHorizontally, 0f);
             }
             

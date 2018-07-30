@@ -46,44 +46,48 @@ namespace NotAMetroidGame
 
             //Animation setup
             walkRight = new Animation();
-            walkRight.AddFrame(new Rectangle(20, 88, 20, 30), TimeSpan.FromSeconds(.15));
-            walkRight.AddFrame(new Rectangle(84, 88, 20, 30), TimeSpan.FromSeconds(.15));
-            walkRight.AddFrame(new Rectangle(148, 88, 20, 30), TimeSpan.FromSeconds(.15));
-            walkRight.AddFrame(new Rectangle(212, 88, 20, 30), TimeSpan.FromSeconds(.15));
-            walkRight.AddFrame(new Rectangle(276, 88, 20, 30), TimeSpan.FromSeconds(.15));
-            walkRight.AddFrame(new Rectangle(340, 88, 20, 30), TimeSpan.FromSeconds(.15));
-            walkRight.AddFrame(new Rectangle(404, 88, 20, 30), TimeSpan.FromSeconds(.15));
-            walkRight.AddFrame(new Rectangle(468, 88, 20, 30), TimeSpan.FromSeconds(.15));
+            walkRight.AddFrame(new Rectangle(20, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(84, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(148, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(212, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(276, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(340, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(404, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(468, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
 
             //Since we use the same frames for both, no need to assign twice.
             walkLeft = walkRight;
 
             idle = new Animation();
-            idle.AddFrame(new Rectangle(20, 24, 20, 30), TimeSpan.FromSeconds(.25));
-            idle.AddFrame(new Rectangle(84, 24, 20, 30), TimeSpan.FromSeconds(.25));
-            idle.AddFrame(new Rectangle(148, 24, 20, 30), TimeSpan.FromSeconds(.25));
-            idle.AddFrame(new Rectangle(212, 24, 20, 30), TimeSpan.FromSeconds(.25));
+            idle.AddFrame(new Rectangle(20, 24, 20, 30), TimeSpan.FromSeconds(.25), "idle");
+            idle.AddFrame(new Rectangle(84, 24, 20, 30), TimeSpan.FromSeconds(.25), "idle");
+            idle.AddFrame(new Rectangle(148, 24, 20, 30), TimeSpan.FromSeconds(.25), "idle");
+            idle.AddFrame(new Rectangle(212, 24, 20, 30), TimeSpan.FromSeconds(.25), "idle");
 
             jump = new Animation();
-            jump.AddFrame(new Rectangle(148, 149, 20, 30), TimeSpan.FromSeconds(1));
+            jump.AddFrame(new Rectangle(148, 149, 20, 30), TimeSpan.FromSeconds(1), "jump");
 
             fall = new Animation();
-            fall.AddFrame(new Rectangle(212, 149, 20, 30), TimeSpan.FromSeconds(1));
+            fall.AddFrame(new Rectangle(212, 149, 20, 30), TimeSpan.FromSeconds(1), "fall");
 
             hurt = new Animation();
-            hurt.AddFrame(new Rectangle(148, 280, 20, 30), TimeSpan.FromSeconds(1));
+            hurt.AddFrame(new Rectangle(148, 280, 20, 30), TimeSpan.FromSeconds(1), "hurt");
 
             attack = new Animation();
-            attack.AddFrame(new Rectangle(20, 728, 27, 30), TimeSpan.FromSeconds(0.05));
-            attack.AddFrame(new Rectangle(84, 728, 27, 30), TimeSpan.FromSeconds(0.15));
-            attack.AddFrame(new Rectangle(148, 728, 27, 30), TimeSpan.FromSeconds(0.25));
-            attack.AddFrame(new Rectangle(212, 728, 27, 30), TimeSpan.FromSeconds(0.25));
-            attack.AddFrame(new Rectangle(276, 728, 27, 30), TimeSpan.FromSeconds(0.15));
-            attack.AddFrame(new Rectangle(340, 728, 27, 30), TimeSpan.FromSeconds(0.05));
+            attack.AddFrame(new Rectangle(20, 728, 27, 30), TimeSpan.FromSeconds(0.05), "attack");
+            attack.AddFrame(new Rectangle(84, 728, 27, 30), TimeSpan.FromSeconds(0.15), "attack");
+            attack.AddFrame(new Rectangle(148, 728, 27, 30), TimeSpan.FromSeconds(0.25), "attack");
+            attack.AddFrame(new Rectangle(212, 728, 27, 30), TimeSpan.FromSeconds(0.25), "attack");
+            attack.AddFrame(new Rectangle(276, 728, 27, 30), TimeSpan.FromSeconds(0.15), "attack");
+            attack.AddFrame(new Rectangle(340, 728, 27, 30), TimeSpan.FromSeconds(0.05), "attack");
 
             currentAnimation = idle;
 
             this.speedCap = 250;
+
+            scaleVector = new Vector2(2.0f, 2.0f);
+
+            tint = Color.White;
         }
 
         /**
@@ -103,21 +107,19 @@ namespace NotAMetroidGame
         public override void Update(GameTime gameTime, Player player)
         {
             base.Update(gameTime, player);
-            //Debug.WriteLine(this.position);
+            Debug.WriteLine(this.velocity);
 
             //Gravity and jump handling
-            if (this.velocity.Y > 0)
+            if (velocity.Y > 0)
             {
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (fallMult - 1));
-                currentAnimation = jump;
-                jump.Update(gameTime);
+                currentAnimation = fall;
 
             }
             else if (this.velocity.Y < 0 && Keyboard.GetState().IsKeyUp(Keys.Up))
             {
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (shortJump - 1));
                 currentAnimation = fall;
-                fall.Update(gameTime);
             }
 
             //Hard coded floor
@@ -149,10 +151,12 @@ namespace NotAMetroidGame
             if (invuln)
             {
                 this.invulnTimer += gameTime.ElapsedGameTime.Milliseconds;
+                this.tint = Color.Red;
 
-                if (invulnTimer > 1000)
+                if (invulnTimer > 800)
                 {
                     //Debug.WriteLine("Invuln ended");
+                    this.tint = Color.White;
                     this.invuln = false;
                     this.invulnTimer = 0;
                 }
@@ -188,26 +192,26 @@ namespace NotAMetroidGame
             //Animations
             if (Keyboard.GetState().IsKeyDown(Keys.Right) && this.position.Y >= 385)
             {
-                facing = 0;
                 currentAnimation = walkRight;
-                walkRight.Update(gameTime);
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.Left) && this.position.Y >= 385)
             {
-                facing = 1;
+                
                 currentAnimation = walkLeft;
-                walkLeft.Update(gameTime);
             }
             else if (this.position.Y >= 385)
             {
                 currentAnimation = idle;
-                idle.Update(gameTime);
+            }
+
+            if (velocity.Y < 0)
+            {
+                currentAnimation = jump;
             }
 
             if (attacking)
             {
                 currentAnimation = attack;
-                attack.Update(gameTime);
             }
             else
             {
@@ -215,10 +219,9 @@ namespace NotAMetroidGame
             }
 
             if (this.recoil)
-            {
                 currentAnimation = hurt;
-                hurt.Update(gameTime);
-            }
+
+            currentAnimation.Update(gameTime);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -238,6 +241,38 @@ namespace NotAMetroidGame
                         0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.FlipHorizontally, 0);
                 }
             }
+        }
+
+        public void SetFacing(int facing)
+        {
+            this.facing = facing;
+        }
+
+        /**
+         * Override from Creature.Damage 
+         **/
+        public override bool Damage(long damage, bool knockback)
+        {
+            if (knockback)
+            {
+                recoil = true;
+                invuln = true;
+                Vector2 newVel = Vector2.Zero;  
+
+                if (velocity.Y > 0)
+                {
+                    if (this.getFacing() == 0)
+                        newVel.X = -450;
+                    else if (this.getFacing() == 1)
+                        newVel.X = 450;
+                    newVel.Y = -800;
+                }
+                velocity = newVel;
+            }
+
+            //Damage numerical calculation happens here
+
+            return false;
         }
 
         public override void Action(GameTime gameTime, Player player)

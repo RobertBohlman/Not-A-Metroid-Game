@@ -12,6 +12,8 @@ namespace NotAMetroidGame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Camera camera;
+        Level map;
         Player player;
         Creature enemy;
 
@@ -54,8 +56,12 @@ namespace NotAMetroidGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            player = new Player(Content);
+            camera = new Camera();
             enemy = new Skeleton(Content);
+            player = new Player(Content);
+            map = new Level();
+            map.InitMap(Content);
+
             // TODO: use this.Content to load your game content here
 
         }
@@ -78,7 +84,7 @@ namespace NotAMetroidGame
         {
             //Player controls
             var kstate = Keyboard.GetState();
-
+            
             if (kstate.IsKeyDown(Keys.Right) && !player.recoil && (!player.Grounded() || !player.attacking))
             {
                 player.SetFacing(0);
@@ -106,10 +112,11 @@ namespace NotAMetroidGame
                 if (kstate.IsKeyUp(Keys.Right) && OldKeyState.IsKeyDown(Keys.Right))
                     player.Move(LEFT, gameTime);
             }
-
             OldKeyState = kstate;
-            player.Update(gameTime, player);
-            enemy.Update(gameTime, player);
+            player.Update(gameTime, map, player);
+            enemy.Update(gameTime, map, player);
+            camera.Update(player.position, graphics);
+            map.Update(gameTime, camera);
 
             //Player to enemy hit detection
             if (player.attacking && player.hit.Intersects(enemy.bound))
@@ -124,7 +131,6 @@ namespace NotAMetroidGame
             }
 
             Debug.WriteLine("");
-
             base.Update(gameTime);
         }
 
@@ -138,8 +144,9 @@ namespace NotAMetroidGame
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            player.Draw(spriteBatch);
-            enemy.Draw(spriteBatch);
+            map.Draw(spriteBatch);
+            player.Draw(spriteBatch, camera);
+            enemy.Draw(spriteBatch, camera);
             spriteBatch.End();
 
             base.Draw(gameTime);

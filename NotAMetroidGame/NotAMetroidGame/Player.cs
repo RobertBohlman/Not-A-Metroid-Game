@@ -8,6 +8,20 @@ namespace NotAMetroidGame
 {
     public class Player : Creature
     {
+        //keeps track of elapsed time since start of an attack
+        private float attackTimer;
+
+        //in an attacking state or not
+        public bool attacking;
+
+        //bounding box of attack
+        public BoundingBox hit;
+
+        public BoundingBox feet;
+
+        public float width = 16;
+        public float height = 64;
+
         //Jump modifiers
         protected float fallMult = 2.5f;
         protected float shortJump = 15f;
@@ -34,9 +48,10 @@ namespace NotAMetroidGame
         public Player(Microsoft.Xna.Framework.Content.ContentManager content)
         {
             //Init placeholder image
+
+            this.position = new Vector2(10, 10);
             this.sprite = content.Load<Texture2D>("sprite_base_addon_2012_12_14");
             this.swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
-            this.position = new Vector2(10, 380);
             this.velocity = new Vector2(0, 0);
 
             attacking = false;
@@ -104,17 +119,17 @@ namespace NotAMetroidGame
             }
         }
 
-        public override void Update(GameTime gameTime, Player player)
+        public override void Update(GameTime gameTime, Level map, Player player)
         {
             base.Update(gameTime, player);
-            Debug.WriteLine(this.velocity);
-
-            //Gravity and jump handling
+            
+            feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 64, 0),
+                new Vector3(this.position.X + 16, this.position.Y + 70, 0));
+                
             if (velocity.Y > 0)
             {
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (fallMult - 1));
                 currentAnimation = fall;
-
             }
             else if (this.velocity.Y < 0 && Keyboard.GetState().IsKeyUp(Keys.Up))
             {
@@ -122,13 +137,9 @@ namespace NotAMetroidGame
                 currentAnimation = fall;
             }
 
-            //Hard coded floor
-            if (this.Grounded())
-            {
-                //Debug.WriteLine("Grounded");
-                this.velocity.Y = 0;
-                this.position.Y = 385;
-            }
+
+            //check for collisions
+            Collision(map);
 
             //Recoil and invulnerability timers
             if (recoil)
@@ -190,20 +201,19 @@ namespace NotAMetroidGame
             }
 
             //Animations
-            if (Keyboard.GetState().IsKeyDown(Keys.Right) && this.position.Y >= 385)
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) && grounded)
             {
                 currentAnimation = walkRight;
             }
-            else if (Keyboard.GetState().IsKeyDown(Keys.Left) && this.position.Y >= 385)
+            else if (Keyboard.GetState().IsKeyDown(Keys.Left) && grounded)
             {
-                
                 currentAnimation = walkLeft;
             }
-            else if (this.position.Y >= 385)
+            else if (grounded)
             {
                 currentAnimation = idle;
             }
-
+            
             if (velocity.Y < 0)
             {
                 currentAnimation = jump;
@@ -224,7 +234,82 @@ namespace NotAMetroidGame
             currentAnimation.Update(gameTime);
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        /*
+         * This function handles the complexities related to collisions. 
+         */
+        private void Collision(Level map)
+        {
+            // Keeps the player within the level boundaries
+            if (this.position.X < map.left)
+            {
+                this.position.X = map.left;
+            }
+            if (this.position.X > map.right - width)
+            {
+                this.position.X = map.right - width;
+            }
+
+
+            Rectangle collisionArea = new Rectangle();
+            collisionArea.X = Math.Min((int)this.position.X, (int)this.prevPosition.X) - 64;
+            collisionArea.Y = Math.Min((int)this.position.Y, (int)this.prevPosition.Y) - 64;
+            collisionArea.Width = Math.Abs((int)(this.position.X - this.prevPosition.X)) + (int)this.width + 64;
+            collisionArea.Height = Math.Abs((int)(this.position.Y - this.prevPosition.Y)) + (int)this.height + 64;
+            //Debug.WriteLine(collisionArea.X + " " + collisionArea.Y + " ");
+            Object[] obstacles = map.GetTiles(collisionArea);
+
+            int xDirection = 0;
+            if (this.position.X < this.prevPosition.X)
+            {
+                xDirection = -1;
+            }
+            else if (this.position.X > this.prevPosition.X)
+            {
+                xDirection = 1;
+            }
+            int yDirection = 0;
+            if (this.position.Y < this.prevPosition.Y)
+            {
+                yDirection = -1;
+            }
+            else if (this.position.Y > this.prevPosition.Y)
+            {
+                yDirection = 1;
+            }
+            bool prevState = grounded;
+            grounded = false;
+            for (int i = 0; i < obstacles.GetLength(0) && obstacles[i] != null; i++)
+            {
+                //Debug.WriteLine(i);
+                Structure s = (Structure)obstacles[i];
+                if (this.bound.Intersects(s.bound))
+                {
+                    if (yDirection > 0
+                        && (this.prevPosition.Y + 50 < s.position.Y || prevState))
+                    {
+                        this.position.Y = (float)(s.position.Y - 60);
+                        this.velocity = Vector2.Zero;
+                        grounded = true;
+                    }
+
+                    else if (xDirection > 0)
+                        this.position.X = s.position.X - this.width;
+                    else if (xDirection < 0)
+                        this.position.X = s.position.X + 64;
+                }
+
+            }
+            /*
+            if (this.position.Y >= 500)
+            {
+                //Debug.WriteLine("Grounded");
+                this.velocity = Vector2.Zero;
+                this.position.Y = 500f;
+            }
+            */
+        }
+
+        public override void Draw(SpriteBatch spriteBatch, Camera camera)
         {
             base.Draw(spriteBatch);
 

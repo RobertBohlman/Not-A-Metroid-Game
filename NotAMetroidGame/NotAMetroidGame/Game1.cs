@@ -13,7 +13,7 @@ namespace NotAMetroidGame
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Camera camera;
-        Level map;
+        Level level;
         Player player;
         Creature enemy;
 
@@ -59,9 +59,9 @@ namespace NotAMetroidGame
             camera = new Camera();
             enemy = new Skeleton(Content);
             player = new Player(Content);
-            map = new Level();
-            player.position = map.spawn_location;
-            map.InitMap(Content);
+            level = new Test_00();
+            player.position = level.GetSpawnLocation();
+            level.InitMap(Content);
 
             // TODO: use this.Content to load your game content here
 
@@ -114,23 +114,23 @@ namespace NotAMetroidGame
                     player.velocity.X = 0;
             }
             OldKeyState = kstate;
-            player.Update(gameTime, map, player);
-            enemy.Update(gameTime, map, player);
+            player.Update(gameTime, level, player);
+            enemy.Update(gameTime, level, player);
             camera.Update(player.position, graphics);
-            map.Update(gameTime, camera);
+            level.Update(gameTime, player, camera);
 
             //Player to enemy hit detection
             if (player.attacking && player.hit.Intersects(enemy.bound))
             {
                 Debug.WriteLine("HIT");
             }
-
+            /*
             //Enemy to player hit detection.
             if (enemy.bound.Intersects(player.bound) && !player.invuln)
             {
                 player.Damage(0, true);
             }
-
+            */
             Debug.WriteLine("");
             base.Update(gameTime);
         }
@@ -145,7 +145,7 @@ namespace NotAMetroidGame
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            map.Draw(spriteBatch);
+            level.Draw(spriteBatch, camera);
             player.Draw(spriteBatch, camera);
             enemy.Draw(spriteBatch, camera);
             spriteBatch.End();

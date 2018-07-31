@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections;
@@ -10,184 +11,150 @@ using System.Threading.Tasks;
 
 namespace NotAMetroidGame
 {
-    public class Level
+    public abstract class Level
     {
-        //Level dimensions
-        public int levelWidth = 20;
-        public int levelHeight = 10;
-        //Size of each square on the grid
-        public static int TILE_SIZE = 64;
 
-        //Spawn location for the player (unused)
-        public Vector2 spawn_location = new Vector2(10, 60);
+        private static int DEFAULT_WIDTH = 800;
+
+        private static int DEFAULT_HEIGHT = 600;
+
+        //Level dimensions
+        protected int width;
+        protected int height;
+
+        //Spawn location for the player
+        // This should be set in InitMap()
+        protected Vector2 spawn_location = new Vector2(10, 60);
 
         //Background image for the level.
-        public Texture2D background;
+        protected Texture2D background;
 
-        //The boundary coordinates for the map
-        public float left;
-        public float right;
-        public float top;
-        public float bottom;
-
-        //Bounds used to determine what structures should be drawn.
-        public int drawPosX;
-        public int drawPosY;
-        public int drawPosWidth;
-        public int drawPosHeight;
-
-        //Camera position
-        public Vector2 cameraPos;
-
-        //Used for shifting the drawn structures when the camera position is inbetween structures.
-        public Vector2 offset;
-
-        //The entire grid of the level.  Contains all the structures within the level.
-        public Structure[,] grid;
+        //The scenery around the map, including interactable and non-interactable terrain
+        protected List<Structure> structures;
+        //The creatures located in this map
+        protected List<Creature> creatures;
 
         public Level()
         {
-            left = 0;
-            top = 0;
-            right = (levelWidth) * TILE_SIZE;
-            bottom = (levelHeight) * TILE_SIZE;
-            grid = new Structure[levelWidth, levelHeight];
+            structures = new List<Structure>();
+            creatures = new List<Creature>();
+            width = DEFAULT_WIDTH;
+            height = DEFAULT_HEIGHT;
         }
 
-        //populates the grid array with all the structures on the map.
-        public void InitMap(Microsoft.Xna.Framework.Content.ContentManager content)
+        // Getters
+
+        public Vector2 GetSpawnLocation()
         {
-            background = content.Load<Texture2D>("test_background");
-            for (int x = 0; x < levelWidth; x++)
+            return spawn_location;
+        }
+
+        public List<Structure> GetStructures()
+        {
+            return structures;
+        }
+
+        public int GetWidth()
+        {
+            return width;
+        }
+
+        public int GetHeight()
+        {
+            return height;
+        }
+
+
+        /// <summary>
+        /// This function is intended to populate the Structure and Entity lists and make any
+        /// other necessary changes before the level is interactable.
+        /// </summary>
+        /// <param name="content">ContentManager used for obtaining any necessary assets.</param>
+        public abstract void InitMap(ContentManager content);
+
+        /// <summary>
+        /// Adds the given Structure or Creature to the level and returns true.  
+        /// If the object is not either of those, the function returns false.
+        /// </summary>
+        /// <param name="obj">The Object to be added.</param>
+        /// <returns>Whether or not the Object has been added.</returns>
+        protected bool AddObject(Object obj)
+        {
+            if (obj is Structure newStructure)
             {
-                for (int y = 0; y < levelHeight; y++)
-                {
-                    if (y >= levelHeight - 2)
-                        grid[x, y] = new TestFloor(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
-                    else if (x > 10 && y >= levelHeight - 4)
-                        grid[x, y] = new TestFloor(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
-                    else
-                        grid[x, y] = new Air(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
-                }
+                structures.Add(newStructure);
+                return true;
+            }
+            else if (obj is Creature newCreature)
+            {
+                creatures.Add(newCreature);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Calls the Update function for every Structure and Creature in the level.
+        /// The camera position is also locked within the boundaries of the level.
+        /// </summary>
+        /// <param name="gametime"></param>
+        /// <param name="player"></param>
+        /// <param name="camera"></param>
+        public virtual void Update(GameTime gametime, Player player, Camera camera)
+        {
+            //Every Structure and Creature is updated
+            structures.ForEach((s) => s.Update(gametime));
+            creatures.ForEach((c) => c.Update(gametime, this, player));
+
+            //Restricts camera movement past level boundaries.  This should be moved at some point.
+            if (camera.position.X < 0)
+            {
+                camera.position.X = 0;
+            }
+            if (camera.position.X > width - camera.width)
+            {
+                camera.position.X = width - camera.width;
+            }
+            if (camera.position.Y < 0)
+            {
+                camera.position.Y = 0;
+            }
+            if (camera.position.Y > height - camera.height)
+            {
+                camera.position.Y = height - camera.height;
             }
         }
 
-        //Gets all the structures within the provided rectangle
-        public Object[] GetTiles(Rectangle area)
+        /// <summary>
+        /// Draws the background image if one exists and calls the Draw
+        /// function on every Structure and Creature in the level.
+        /// </summary>
+        /// <param name="sb"></param>
+        /// <param name="camera"></param>
+        public virtual void Draw(SpriteBatch sb, Camera camera)
         {
-            int areaX = area.X / TILE_SIZE;
-            int areaY = area.Y / TILE_SIZE;
-            int areaWidth = areaX + (area.Width / TILE_SIZE);
-            int areaHeight = areaY + (area.Height / TILE_SIZE);
-
-            if (areaWidth > grid.GetLength(0) - 1)
-                areaWidth = grid.GetLength(0) - 1;
-            if (areaHeight > grid.GetLength(1) - 1)
-                areaHeight = grid.GetLength(1) - 1;
-            if (areaX < 0) areaX = 0;
-            if (areaY < 0) areaY = 0;
-            int numTiles = (areaWidth - areaX + 1) * (areaHeight - areaY + 1);
-            if (numTiles < 0) numTiles = 0;
-            //Debug.WriteLine(numTiles);
-            ArrayList tile = new ArrayList();
-            Structure[] tiles = new Structure[numTiles];
-            //int index = 0;
-            for (int i = areaX; i <= areaWidth; i++)
+            if (background != null)
             {
-                for (int j = areaY; j <= areaHeight; j++)
-                {
-                    if (grid[i,j].solid == true)
-                    {
-                        //tiles[index] = grid[i, j];
-                        tile.Add(grid[i, j]);
-                        //index++;
-                    }
-                }
+                sb.Draw(background, new Vector2(0, 0), Color.White);
             }
-            return tile.ToArray();
-        }
-
-        // Adjusts the camera if needed.  Sets the drawing positions to determine what structures are currently visible.
-        public void Update(GameTime gametime, Camera camera)
-        {
-            if (camera.position.X < left)
-            {
-                camera.position.X = left;
-            }
-            if (camera.position.X > right - camera.width)
-            {
-                camera.position.X = right - camera.width;
-            }
-            if (camera.position.Y < top)
-            {
-                camera.position.Y = top;
-            }
-            if (camera.position.Y > bottom - camera.height)
-            {
-                camera.position.Y = bottom - camera.height;
-            }
-            cameraPos = camera.position;
-            drawPosX = (int)(cameraPos.X / TILE_SIZE);
-            drawPosWidth = drawPosX + (int)(camera.width / TILE_SIZE) + 1;
-            drawPosY = (int)(cameraPos.Y / TILE_SIZE);
-            drawPosHeight = drawPosY + (int)(camera.height / TILE_SIZE) + 1;
-            offset = new Vector2(cameraPos.X % TILE_SIZE, cameraPos.Y % TILE_SIZE);
-
-        }
-
-        // Draws only the visible structures on the screen.
-        public void Draw(SpriteBatch sb)
-        {
-            int currX = 0;
-            int currY = 0;
-            if (drawPosX < 0)
-                drawPosX = 0;
-            if (drawPosY < 0)
-                drawPosY = 0;
-            if (drawPosWidth >= levelWidth)
-                drawPosWidth = levelWidth - 1;
-            if (drawPosHeight >= levelHeight)
-                drawPosHeight = levelHeight - 1;
-            sb.Draw(background, new Vector2((0 - cameraPos.X)/ 4, (0 - cameraPos.Y)/4), Color.White);
-            for (int x = drawPosX; x <= drawPosWidth; x++)
-            {
-                for (int y = drawPosY; y <= drawPosHeight; y++)
-                {
-                    if (grid[x, y].sprite != null)
-                    {
-                        sb.Draw(grid[x, y].sprite, new Vector2(currX * TILE_SIZE - offset.X, currY * TILE_SIZE - offset.Y), Color.White);
-                    }
-                    currY++;
-                }
-                currY = 0;
-                currX++;
-            }
+            structures.ForEach((s) => s.Draw(sb, camera));
+            creatures.ForEach((e) => e.Draw(sb, camera));
         }
     }
-    /*
-    public class TestLevel : Level
+
+    /// <summary>
+    /// A Level that contains platforms for collision testing.
+    /// </summary>
+    public class Test_00 : Level
     {
+        private static string BG_NAME = "test_background";
 
-        public TestLevel()
+        public override void InitMap(ContentManager content)
         {
-            this.levelWidth = 20;
-            this.levelHeight = 10;
-        }
-
-
-        public new void InitMap(Microsoft.Xna.Framework.Content.ContentManager content)
-        {
-            for (int x = 0; x < levelWidth; x++)
-            {
-                for (int y = 0; y < levelHeight; y++)
-                {
-                    if (y >= levelHeight - 2)
-                        grid[x, y] = new TestFloor(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
-                    else
-                        grid[x, y] = new Air(content, new Vector2(x * TILE_SIZE, y * TILE_SIZE));
-                }
-            }
+            AddObject(new TestFloor(content, 0, 500));
+            AddObject(new TestFloorSmall(content, 0, 300));
+            AddObject(new TestFloorSmall(content, 400, 400));
+            background = content.Load<Texture2D>(BG_NAME);
         }
     }
-    */
 }

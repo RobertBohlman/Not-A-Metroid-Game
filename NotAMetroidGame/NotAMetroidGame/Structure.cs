@@ -1,66 +1,87 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace NotAMetroidGame
 {
-    public class Structure
+    public abstract class Structure
     {
         //Sprite of the structure
-        public Texture2D sprite;
+        protected Texture2D sprite;
 
         //Location
-        public Vector2 position;
+        protected Vector2 position;
 
         //The bounding box
-        public BoundingBox bound;
+        protected BoundingBox bound;
 
-        //Determines if this structure can be collided with or not.
-        public bool solid;
+        protected int width;
 
-        //A string that can contain the letters 'l', 'r', 'u', or 'd'.  Determines which directions are valid for collision
-        public string validDirections;
+        protected int height;
 
         public Structure()
         {
 
+        }
+
+        public BoundingBox GetBounds()
+        {
+            return bound;
+        }
+
+        public abstract void Update(GameTime gametime);
+
+        public virtual void Draw(SpriteBatch spritebatch, Camera camera)
+        {
+            spritebatch.Draw(sprite, Vector2.Subtract(position, camera.position), Color.White);
         }
     }
 
     // A checkered floor used to test collisions
     public class TestFloor : Structure
     {
-        public TestFloor(Microsoft.Xna.Framework.Content.ContentManager content, Vector2 position)
+        private static string SPRITE_NAME = "TestFloor";
+        private static int DEFAULT_WIDTH = 800;
+        private static int DEFAULT_HEIGHT = 100;
+
+
+        public TestFloor(ContentManager content, int x, int y)
         {
-            this.sprite = sprite = content.Load<Texture2D>("test_floor");
-            this.position = position;
-            this.solid = true;
-            this.validDirections = "udlr";
-            this.bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                new Vector3(this.position.X + 64, this.position.Y + 64, 0));
+            sprite = content.Load<Texture2D>(SPRITE_NAME);
+            position = new Vector2(x, y);
+            width = DEFAULT_WIDTH;
+            height = DEFAULT_HEIGHT;
+            bound = new BoundingBox(new Vector3(position, 0), 
+                new Vector3(x + width, y + height, 0));
+        }
+
+        public override void Update(GameTime gametime)
+        {
+            //Do nothing
         }
     }
 
-    public class TestPlatform : Structure
+    public class TestFloorSmall : Structure
     {
-        public TestPlatform(Microsoft.Xna.Framework.Content.ContentManager content, Vector2 position)
-        {
-            this.sprite = sprite = content.Load<Texture2D>("test_floor");
-            this.position = position;
-            this.solid = true;
-            this.validDirections = "u";
-            this.bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                new Vector3(this.position.X + 64, this.position.Y + 64, 0));
-        }
-    }
+        private static string SPRITE_NAME = "test_floor";
+        private static int DEFAULT_WIDTH = 64;
+        private static int DEFAULT_HEIGHT = 64;
 
-    // Air is the open space in the game
-    public class Air : Structure
-    {
-        public Air(Microsoft.Xna.Framework.Content.ContentManager content, Vector2 position)
+
+        public TestFloorSmall(ContentManager content, int x, int y)
         {
-            this.position = position;
-            this.solid = false;
+            sprite = content.Load<Texture2D>(SPRITE_NAME);
+            position = new Vector2(x, y);
+            width = DEFAULT_WIDTH;
+            height = DEFAULT_HEIGHT;
+            bound = new BoundingBox(new Vector3(position, 0),
+                new Vector3(x + width, y + height, 0));
+        }
+
+        public override void Update(GameTime gametime)
+        {
+            //Do nothing
         }
     }
 }

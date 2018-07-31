@@ -97,8 +97,8 @@ namespace NotAMetroidGame
             this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
 
             // Updating bound.  Hard-coded values need to be removed.
-            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+            //bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+               // new Vector3(this.position.X + 37, this.position.Y + 60, 0));
         }
 
         //Checks if the creature is standing on something. Hard coded for now.

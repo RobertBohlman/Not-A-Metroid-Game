@@ -19,7 +19,7 @@ namespace NotAMetroidGame
         public static int TILE_SIZE = 64;
 
         //Spawn location for the player (unused)
-        public static Vector2 SPAWN_LOCATION = new Vector2();
+        public Vector2 spawn_location = new Vector2(10, 60);
 
         //Background image for the level.
         public Texture2D background;

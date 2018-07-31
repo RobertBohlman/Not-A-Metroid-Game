@@ -39,8 +39,7 @@ namespace NotAMetroidGame
         public Player(Microsoft.Xna.Framework.Content.ContentManager content)
         {
             //Init placeholder image
-
-            this.position = new Vector2(10, 10);
+    
             this.sprite = content.Load<Texture2D>("sprite_base_addon_2012_12_14");
             this.swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
             this.velocity = new Vector2(0, 0);
@@ -112,13 +111,16 @@ namespace NotAMetroidGame
 
         public override void Update(GameTime gameTime, Level map, Player player)
         {
+            //check for collisions
+            Collision(map);
             base.Update(gameTime, map, player);
             bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
                         new Vector3(this.position.X + 37, this.position.Y + 60, 0));
 
             feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 60, 0),
                 new Vector3(this.position.X + 16, this.position.Y + 70, 0));
-                
+
+
             if (velocity.Y > 0)
             {
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (fallMult - 1));
@@ -129,10 +131,6 @@ namespace NotAMetroidGame
                 this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (shortJump - 1));
                 currentAnimation = fall;
             }
-
-
-            //check for collisions
-            Collision(map);
 
             //Recoil and invulnerability timers
             if (recoil)
@@ -281,18 +279,26 @@ namespace NotAMetroidGame
                         && (this.prevPosition.Y + 50 < s.position.Y || prevState))
                     {
                         this.position.Y = (float)(s.position.Y - 64);
-                        this.velocity = Vector2.Zero;
+                        this.velocity.Y = 0;
                         grounded = true;
                     }
 
-                    else if (xDirection > 0)
+                    if (xDirection > 0)
+                    {
                         this.position.X = s.position.X - this.width;
+                        this.velocity.X = 0;
+                    }
+                        
                     else if (xDirection < 0)
+                    {
                         this.position.X = s.position.X + 64;
+                        this.velocity.X = 0;
+                    }
+                        
                 }
                 else if (this.feet.Intersects(s.bound))
                 {
-                    this.velocity = Vector2.Zero;
+                    this.velocity.Y = 0;
                     grounded = true;
                 }
 
@@ -315,12 +321,12 @@ namespace NotAMetroidGame
             {
                 if (this.facing == 0)
                 {
-                    spriteBatch.Draw(swordSprite, new Vector2(this.position.X + 37, this.position.Y + 20), null, Color.White,
+                    spriteBatch.Draw(swordSprite, Vector2.Subtract(new Vector2(this.position.X + 37, this.position.Y + 20), camera.position), null, Color.White,
                         0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.None, 0);
                 }
                 else
                 {
-                    spriteBatch.Draw(swordSprite, new Vector2(this.position.X - 62, this.position.Y + 20), null, Color.White, 
+                    spriteBatch.Draw(swordSprite, Vector2.Subtract(new Vector2(this.position.X - 62, this.position.Y + 20), camera.position), null, Color.White, 
                         0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.FlipHorizontally, 0);
                 }
             }

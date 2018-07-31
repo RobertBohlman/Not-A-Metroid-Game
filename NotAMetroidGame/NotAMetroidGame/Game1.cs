@@ -60,6 +60,7 @@ namespace NotAMetroidGame
             enemy = new Skeleton(Content);
             player = new Player(Content);
             map = new Level();
+            player.position = map.spawn_location;
             map.InitMap(Content);
 
             // TODO: use this.Content to load your game content here
@@ -107,10 +108,10 @@ namespace NotAMetroidGame
                     player.Attack(gameTime);
 
                 if (kstate.IsKeyUp(Keys.Left) && OldKeyState.IsKeyDown(Keys.Left))
-                    player.Move(RIGHT, gameTime);
+                    player.velocity.X = 0;
 
                 if (kstate.IsKeyUp(Keys.Right) && OldKeyState.IsKeyDown(Keys.Right))
-                    player.Move(LEFT, gameTime);
+                    player.velocity.X = 0;
             }
             OldKeyState = kstate;
             player.Update(gameTime, map, player);

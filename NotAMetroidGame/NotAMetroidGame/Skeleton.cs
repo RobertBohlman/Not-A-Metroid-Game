@@ -7,36 +7,48 @@ namespace NotAMetroidGame
 {
     public class Skeleton : Creature
     {
-        //How long this enemy waits before switching patrol paths
-        private int pathTimer;
-
         //Direction the skeleton is patrolling 0 = right, 1 = left
         private int path;
 
-        private int stop;
-
+        //Animations
         private Animation stopped;
         private Animation walking;
         private Animation swing;
 
+        //Skeleton's attack state
         private bool attacking;
 
+        //Determines if the skeleton has walked into a wall
+        private bool collided;
+
+        //How long the skeleton spends recovering after a swing
         private float recoveryTimer;
 
         public Texture2D swordSprite;
 
-        private Vector2 RIGHT;
-        private Vector2 LEFT;
+        //Speed constants
+        private readonly Vector2 RIGHT = new Vector2(150, 0);
+        private readonly Vector2 LEFT = new Vector2(-150, 0);
 
         public Skeleton(Microsoft.Xna.Framework.Content.ContentManager content)
         {
-            this.sprite = sprite = content.Load<Texture2D>("orc_skeleton_single");
-            this.swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
-            this.position = new Vector2(350, 385);
-            this.velocity = new Vector2(0, 0);
+            //Variable setup
+            sprite = sprite = content.Load<Texture2D>("orc_skeleton_single");
+            swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
+            position = new Vector2(500, 385);
+            velocity = new Vector2(0, 0);
+            size = new Vector2(45, 55);
+            speedCap = 80;
 
-            this.speedCap = 150;
+            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+            prevBound = bound;
 
+            path = 0;
+
+            tint = Color.White;
+
+            //Animation setup
             stopped = new Animation();
             stopped.AddFrame(new Rectangle(0, 0, 66, 96), TimeSpan.FromSeconds(1), "stopped");
 
@@ -47,22 +59,14 @@ namespace NotAMetroidGame
             swing.AddFrame(new Rectangle(0, 0, 66, 96), TimeSpan.FromSeconds(0.33), "swing");
             swing.AddFrame(new Rectangle(0, 0, 66, 96), TimeSpan.FromSeconds(1), "recovery");
 
-            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                new Vector3(this.position.X + 37, this.position.Y + 60, 0));
-
-            RIGHT = new Vector2(150, 0);
-            LEFT = new Vector2(-150, 0);
-
-            pathTimer = 0;
-            path = 0;
-
-            speedCap = 80;
-
-            tint = Color.White;
-
             scaleVector = new Vector2(0.7f, 0.7f);
         }
 
+        /**The skeleton's basic attack
+         * Swings weapon directly in front of the skeleton
+         * 
+         * Changes state to attacking
+         **/
         public void Swing()
         {
             if (!attacking)
@@ -101,6 +105,11 @@ namespace NotAMetroidGame
                 if (position.X >= 740)
                     path = 1;
 
+                if (collided)
+                {
+                    path = (path + 1) % 2;
+                }
+
                 if (path == 1)
                 {
                     facing = 1;
@@ -124,14 +133,7 @@ namespace NotAMetroidGame
         {
 
             base.Update(gameTime, map, player);
-
-            //Hard coded floor
-            if (this.Grounded())
-            {
-                //Debug.WriteLine("Grounded");
-                this.velocity.Y = 0;
-                this.position.Y = 385;
-            }
+            collided = Collision(map);
 
             if (attacking)
             {
@@ -145,19 +147,19 @@ namespace NotAMetroidGame
                 {
                     if (facing == 0)
                     {
-                        bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                        hit = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
                                      new Vector3(this.position.X + 117, this.position.Y + 60, 0));
                     }
                     else
                     {
-                        bound = new BoundingBox(new Vector3(this.position.X - 80, this.position.Y, 0),
+                        hit = new BoundingBox(new Vector3(this.position.X - 80, this.position.Y, 0),
                                     new Vector3(this.position.X + 37, this.position.Y + 60, 0));
                     }
                 }
                 else if (String.Equals(currentAnimation.getFrameName(), "recovery"))
                 {
-                    bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                            new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+                    hit = new BoundingBox(new Vector3(0, 0, 0),
+                                    new Vector3(0, 0, 0));
                     tint = Color.Yellow;
                     recoveryTimer += gameTime.ElapsedGameTime.Milliseconds;
 
@@ -186,20 +188,18 @@ namespace NotAMetroidGame
 
         public override void Draw(SpriteBatch spriteBatch, Camera camera)
         {
-
-            //spriteBatch.Draw(this.sprite, this.position, null, Color.White, 0, Vector2.Zero, 0.23f, SpriteEffects.None, 0f);
             base.Draw(spriteBatch, camera);
 
             if (String.Equals(currentAnimation.getFrameName(), "swing"))
             {
                 if (this.facing == 0)
                 {
-                    spriteBatch.Draw(swordSprite, new Vector2(this.position.X + 37, this.position.Y + 20), null, Color.White,
+                    spriteBatch.Draw(swordSprite, Vector2.Subtract(new Vector2(this.position.X + 37, this.position.Y + 20), camera.position), null, Color.White,
                         0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.None, 0);
                 }
                 else
                 {
-                    spriteBatch.Draw(swordSprite, new Vector2(this.position.X - 62, this.position.Y + 20), null, Color.White,
+                    spriteBatch.Draw(swordSprite, Vector2.Subtract(new Vector2(this.position.X - 62, this.position.Y + 20), camera.position), null, Color.White,
                         0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.FlipHorizontally, 0);
                 }
             }

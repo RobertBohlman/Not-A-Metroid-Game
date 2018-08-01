@@ -19,10 +19,10 @@ namespace NotAMetroidGame
 
         //Should probably have a better place for these,
         //maybe an enum class?
-        public static Vector2 GRAV_CONSTANT;
-        public static Vector2 RIGHT;
-        public static Vector2 LEFT;
-        public static Vector2 JUMP;
+        public static readonly Vector2 GRAV_CONSTANT = new Vector2(0, 900);
+        public static readonly Vector2 RIGHT = new Vector2(250, 0);
+        public static readonly Vector2 LEFT = new Vector2(-250, 0);
+        public static readonly Vector2 JUMP = new Vector2(0, -600);
 
         KeyboardState OldKeyState;
 
@@ -40,11 +40,6 @@ namespace NotAMetroidGame
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-            GRAV_CONSTANT = new Vector2(0, 900);
-            RIGHT = new Vector2(250, 0);
-            LEFT = new Vector2(-250, 0);
-            JUMP = new Vector2(0, -600);
             base.Initialize();
         }
 
@@ -124,13 +119,13 @@ namespace NotAMetroidGame
             {
                 Debug.WriteLine("HIT");
             }
-            /*
+            
             //Enemy to player hit detection.
-            if (enemy.bound.Intersects(player.bound) && !player.invuln)
+            if ((enemy.bound.Intersects(player.bound) || enemy.hit.Intersects(player.bound)) && !player.invuln)
             {
                 player.Damage(0, true);
             }
-            */
+            
             Debug.WriteLine("");
             base.Update(gameTime);
         }

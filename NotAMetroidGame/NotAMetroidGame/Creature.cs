@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace NotAMetroidGame
@@ -29,6 +30,16 @@ namespace NotAMetroidGame
         public int speedCap;
         
         protected bool grounded;
+
+        public BoundingBox feet;
+
+        public BoundingBox prevBound;
+
+        //bounding box of attack
+        public BoundingBox hit;
+
+        //Size of the creature
+        protected Vector2 size;
 
         public Creature()
         {
@@ -96,12 +107,89 @@ namespace NotAMetroidGame
             this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
             this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
 
-            // Updating bound.  Hard-coded values need to be removed.
-            //bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-               // new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+            prevBound = bound;
+            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                        new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+
+            feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 60, 0),
+                new Vector3(this.position.X + 16, this.position.Y + 70, 0));
+
         }
 
-        //Checks if the creature is standing on something. Hard coded for now.
+        /// <summary>
+        /// Checks for any collisions with Structures on the current level.
+        /// </summary>
+        /// <param name="level"></param>
+        protected bool Collision(Level level)
+        {
+            List<Structure> structures = level.GetStructures();
+            //The player is falling unless a floor is detected
+            bool wallCollide = false;
+            grounded = false;
+            structures.ForEach((s) =>
+            {
+                BoundingBox obj = s.GetBounds();
+                if (obj.Intersects(bound))
+                {
+                    //Checking if the player landed on the object
+                    if (prevPosition.Y < position.Y && prevBound.Max.Y < obj.Min.Y)
+                    {
+                        position.Y = obj.Min.Y + bound.Min.Y - bound.Max.Y;
+                        velocity.Y = 0;
+                    }
+                    //Colliding with the bottom of the structure
+                    else if (prevPosition.Y > position.Y && prevBound.Min.Y > obj.Max.Y)
+                    {
+                        position.Y = obj.Max.Y;
+                        velocity.Y = 0;
+                    }
+                    //Colliding with the left side of the structure
+                    else if (prevPosition.X < position.X && Math.Abs(obj.Min.Y - bound.Max.Y) > 0.001)
+                    {
+                        position.X = obj.Min.X + bound.Min.X - bound.Max.X;
+                        velocity.X = 0;
+                        wallCollide = true;
+                    }
+                    //Colliding with the right side of the structure
+                    else if (prevPosition.X > position.X && Math.Abs(obj.Min.Y - bound.Max.Y) > 0.001)
+                    {
+                        position.X = obj.Max.X;
+                        velocity.X = 0;
+                        wallCollide = true;
+                    }
+                    // Updating the bounds after every position change
+                    UpdateBounds();
+                    // Checking for any Structures that are right below the player
+                    if (obj.Intersects(feet) && !(Math.Abs(feet.Min.X - obj.Max.X) < 0.001 || Math.Abs(feet.Max.X - obj.Min.X) < 0.001))
+                    {
+                        grounded = true;
+                        if (velocity.Y > 0)
+                            velocity.Y = 0;
+                    }
+                }
+
+            });
+
+            // For Testing purposes: The player will be moved back to the top of the level if they fall out of bounds.
+            while (position.Y > level.GetHeight())
+            {
+                position.Y -= level.GetHeight();
+            }
+            return wallCollide;
+        }
+
+        /// <summary>
+        /// Updates the BoundingBoxes to the player's position.
+        /// </summary>
+        private void UpdateBounds()
+        {
+            bound = new BoundingBox(new Vector3(position, 0),
+                new Vector3(Vector2.Add(position, size), 0));
+            feet = new BoundingBox(new Vector3(position.X, position.Y + size.Y, 0),
+                new Vector3(position.X + size.X, position.Y + size.Y + 1, 0));
+        }
+
+        //Checks if the creature is standing on something.
         public bool Grounded()
         {
             return this.grounded;

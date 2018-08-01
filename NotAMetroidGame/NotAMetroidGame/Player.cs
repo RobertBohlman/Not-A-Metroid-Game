@@ -15,22 +15,12 @@ namespace NotAMetroidGame
         //in an attacking state or not
         public bool attacking;
 
-        //bounding box of attack
-        public BoundingBox hit;
-
-        public BoundingBox feet;
-
-        public BoundingBox prevBound;
-
         public float width = 16;
         public float height = 64;
 
         //Jump modifiers
         protected float fallMult = 2.5f;
         protected float shortJump = 15f;
-
-        //Size of the player.  Needs to be initialized elsewhere
-        private Vector2 size = new Vector2(37, 60);
 
         Animation walkRight;
         Animation walkLeft;
@@ -49,6 +39,7 @@ namespace NotAMetroidGame
             this.sprite = content.Load<Texture2D>("sprite_base_addon_2012_12_14");
             this.swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
             this.velocity = new Vector2(0, 0);
+            this.size = new Vector2(37, 60);
 
             attacking = false;
 
@@ -119,13 +110,6 @@ namespace NotAMetroidGame
         public override void Update(GameTime gameTime, Level map, Player player)
         {
             base.Update(gameTime, map, player);
-            prevBound = bound;
-            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                        new Vector3(this.position.X + 37, this.position.Y + 60, 0));
-
-            feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 60, 0),
-                new Vector3(this.position.X + 16, this.position.Y + 70, 0));
-
             Collision(map);
 
             if (velocity.Y > 0)
@@ -230,75 +214,6 @@ namespace NotAMetroidGame
                 currentAnimation = hurt;
 
             currentAnimation.Update(gameTime);
-        }
-
-        /// <summary>
-        /// Checks for any collisions with Structures on the current level.
-        /// </summary>
-        /// <param name="level"></param>
-        private void Collision(Level level)
-        {
-            List<Structure> structures = level.GetStructures();
-            //The player is falling unless a floor is detected
-            grounded = false;
-            structures.ForEach((s) =>
-            {
-                BoundingBox obj = s.GetBounds();
-                if (obj.Intersects(bound))
-                {
-                    //Checking if the player landed on the object
-                    if (prevPosition.Y < position.Y && prevBound.Max.Y < obj.Min.Y)
-                    {
-                        position.Y = obj.Min.Y + bound.Min.Y - bound.Max.Y;
-                        velocity.Y = 0;
-                    }
-                    //Colliding with the bottom of the structure
-                    else if (prevPosition.Y > position.Y && prevBound.Min.Y > obj.Max.Y)
-                    {
-                        position.Y = obj.Max.Y;
-                        velocity.Y = 0;
-                    }
-                    //Colliding with the left side of the structure
-                    else if (prevPosition.X < position.X && Math.Abs(obj.Min.Y - bound.Max.Y) > 0.001)
-                    {
-                        position.X = obj.Min.X + bound.Min.X - bound.Max.X;
-                        velocity.X = 0;
-                    }
-                    //Colliding with the right side of the structure
-                    else if (prevPosition.X > position.X && Math.Abs(obj.Min.Y - bound.Max.Y) > 0.001)
-                    {
-                        position.X = obj.Max.X;
-                        velocity.X = 0;
-                    }
-                    // Updating the bounds after every position change
-                    UpdateBounds();
-                    // Checking for any Structures that are right below the player
-                    if (obj.Intersects(feet) && !(Math.Abs(feet.Min.X - obj.Max.X) < 0.001 || Math.Abs(feet.Max.X - obj.Min.X) < 0.001))
-                    {
-                        grounded = true;
-                        if (velocity.Y > 0)
-                            velocity.Y = 0;
-                    }
-                }
-
-            });
-
-            // For Testing purposes: The player will be moved back to the top of the level if they fall out of bounds.
-            while (position.Y > level.GetHeight())
-            {
-                position.Y -= level.GetHeight();
-            }
-        }
-
-        /// <summary>
-        /// Updates the BoundingBoxes to the player's position.
-        /// </summary>
-        private void UpdateBounds()
-        {
-            bound = new BoundingBox(new Vector3(position, 0), 
-                new Vector3(Vector2.Add(position, size), 0));
-            feet = new BoundingBox(new Vector3(position.X, position.Y + size.Y, 0),
-                new Vector3(position.X + size.X, position.Y + size.Y + 1, 0));
         }
 
         public override void Draw(SpriteBatch spriteBatch, Camera camera)

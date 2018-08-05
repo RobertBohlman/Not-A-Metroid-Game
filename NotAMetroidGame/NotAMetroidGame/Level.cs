@@ -64,6 +64,15 @@ namespace NotAMetroidGame
             return height;
         }
 
+        /// <summary>
+        /// Returns the creature list for the level
+        /// Note this isn't safe encapsulation (list is mutable)
+        /// </summary>
+        /// <returns>The level's list of creatures</returns>
+        public List<Creature> GetCreatures()
+        {
+            return this.creatures;
+        }
 
         /// <summary>
         /// This function is intended to populate the Structure and Entity lists and make any
@@ -91,7 +100,7 @@ namespace NotAMetroidGame
                 return true;
             }
             return false;
-        }
+        }  
 
         /// <summary>
         /// Calls the Update function for every Structure and Creature in the level.
@@ -155,6 +164,7 @@ namespace NotAMetroidGame
             AddObject(new TestFloorSmall(content, 0, 300));
             AddObject(new TestFloorSmall(content, 200, 415));
             AddObject(new TestFloorSmall(content, 700, 415));
+            AddObject(new Skeleton(content, new Vector2(500, 385)));
             background = content.Load<Texture2D>(BG_NAME);
         }
     }

@@ -30,12 +30,11 @@ namespace NotAMetroidGame
         private readonly Vector2 RIGHT = new Vector2(150, 0);
         private readonly Vector2 LEFT = new Vector2(-150, 0);
 
-        public Skeleton(Microsoft.Xna.Framework.Content.ContentManager content)
+        public Skeleton(Microsoft.Xna.Framework.Content.ContentManager content, Vector2 pos) : base(pos)
         {
             //Variable setup
             sprite = sprite = content.Load<Texture2D>("orc_skeleton_single");
             swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
-            position = new Vector2(500, 385);
             velocity = new Vector2(0, 0);
             size = new Vector2(45, 55);
             speedCap = 80;

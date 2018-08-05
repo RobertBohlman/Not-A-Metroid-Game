@@ -32,7 +32,7 @@ namespace NotAMetroidGame
 
         public Texture2D swordSprite;
 
-        public Player(Microsoft.Xna.Framework.Content.ContentManager content)
+        public Player(Microsoft.Xna.Framework.Content.ContentManager content, Vector2 pos) : base(pos)
         {
             //Init placeholder image
     

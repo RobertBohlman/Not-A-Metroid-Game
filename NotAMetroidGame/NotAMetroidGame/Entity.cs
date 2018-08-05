@@ -34,7 +34,6 @@ namespace NotAMetroidGame
 
         public Entity()
         {
-            tint = Color.White;
         }
 
         public int getFacing()

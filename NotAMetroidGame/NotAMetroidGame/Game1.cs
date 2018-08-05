@@ -15,7 +15,6 @@ namespace NotAMetroidGame
         Camera camera;
         Level level;
         Player player;
-        Creature enemy;
 
         //Should probably have a better place for these,
         //maybe an enum class?
@@ -51,10 +50,9 @@ namespace NotAMetroidGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            camera = new Camera();
-            enemy = new Skeleton(Content);
-            player = new Player(Content);
+            camera = new Camera();   
             level = new Test_00();
+            player = new Player(Content, level.GetSpawnLocation());
             player.position = level.GetSpawnLocation();
             level.InitMap(Content);
 
@@ -110,20 +108,24 @@ namespace NotAMetroidGame
             }
             OldKeyState = kstate;
             player.Update(gameTime, level, player);
-            enemy.Update(gameTime, level, player);
             camera.Update(player.position, graphics);
             level.Update(gameTime, player, camera);
 
             //Player to enemy hit detection
-            if (player.attacking && player.hit.Intersects(enemy.bound))
+            if (player.attacking)
             {
-                Debug.WriteLine("HIT");
+                foreach (Creature enemy in level.GetCreatures())
+                {
+                    if (player.hit.Intersects(enemy.bound))
+                        Debug.WriteLine("HIT");
+                }   
             }
-            
+
             //Enemy to player hit detection.
-            if ((enemy.bound.Intersects(player.bound) || enemy.hit.Intersects(player.bound)) && !player.invuln)
+            foreach (Creature enemy in level.GetCreatures())
             {
-                player.Damage(0, true);
+                if ((enemy.bound.Intersects(player.bound) || enemy.hit.Intersects(player.bound)) && !player.invuln)
+                    player.Damage(0, true);
             }
             
             Debug.WriteLine("");
@@ -142,7 +144,8 @@ namespace NotAMetroidGame
             spriteBatch.Begin();
             level.Draw(spriteBatch, camera);
             player.Draw(spriteBatch, camera);
-            enemy.Draw(spriteBatch, camera);
+            foreach (Creature enemy in level.GetCreatures())
+                enemy.Draw(spriteBatch, camera);
             spriteBatch.End();
 
             base.Draw(gameTime);

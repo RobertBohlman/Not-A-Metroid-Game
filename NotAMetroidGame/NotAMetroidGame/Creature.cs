@@ -41,15 +41,16 @@ namespace NotAMetroidGame
         //Size of the creature
         protected Vector2 size;
 
-        public Creature()
+        public Creature(Vector2 pos)
         {
+            this.position = pos;
         }
 
-        /** Adjust this creature's velocity by adding the movement vector.
-         * 
-         * This function will likely be where the logic for collision is implemented.
-         * 
-         **/
+        /// <summary>
+        /// Adjust this creature's velocity by adding the movement vector.
+        /// </summary>
+        /// <param name="movement"></param>
+        /// <param name="gameTime"></param>
         public void Move(Vector2 movement, GameTime gameTime)
         {
             this.velocity = Vector2.Add(this.velocity, movement);
@@ -83,12 +84,15 @@ namespace NotAMetroidGame
             tint = Color.Red;
         }
 
-        /**Update Creature's position
-         * 
-         * This method contains the basic info for adding velocity to any creature's position
-         * 
-         * Player and other enemies with abnormal movement will override this method
-         **/
+        /// <summary>
+        /// Periodic update method for creatures
+        /// Handles adjustment of positon by velocity, gravity, collision and physics
+        /// Also changes creature state depending on attack, idle, etc
+        /// Overriden by each creature and player
+        /// </summary>
+        /// <param name="gameTime">Game Time object</param>
+        /// <param name="map">Current level</param>
+        /// <param name="player">Player reference, used for enemy AI</param>
         public virtual void Update(GameTime gameTime, Level map, Player player)
         {
             this.prevPosition = new Vector2(this.position.X, this.position.Y);
@@ -195,10 +199,12 @@ namespace NotAMetroidGame
             return this.grounded;
         }
 
-        /**Logic for enemy AI
-         * 
-         * Called every update, determine if move/attack, etc.
-         **/
+        /// <summary>
+        /// Logic for enemy AI
+        /// Called every update, determine if move/attack, etc.
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="player"></param>
         public abstract void Action(GameTime gameTime, Player player);
         //internal abstract bool Attack();
     }

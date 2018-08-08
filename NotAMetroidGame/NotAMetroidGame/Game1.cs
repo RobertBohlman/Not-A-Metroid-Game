@@ -76,6 +76,11 @@ namespace NotAMetroidGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            if (level.nextLevel != null)
+            {
+                level = level.nextLevel;
+                level.InitMap(Content);
+            }
             //Player controls
             var kstate = Keyboard.GetState();
             

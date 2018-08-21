@@ -125,7 +125,7 @@ namespace NotAMetroidGame
             foreach (Creature enemy in level.GetCreatures())
             {
                 if ((enemy.bound.Intersects(player.bound) || enemy.hit.Intersects(player.bound)) && !player.invuln)
-                    player.Damage(0, true);
+                    player.Damage(enemy.getBody(), true);
             }
             
             Debug.WriteLine("");

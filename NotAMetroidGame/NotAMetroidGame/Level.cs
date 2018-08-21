@@ -34,6 +34,8 @@ namespace NotAMetroidGame
         //The creatures located in this map
         protected List<Creature> creatures;
 
+        public Level nextLevel;
+
         public Level()
         {
             structures = new List<Structure>();
@@ -102,6 +104,22 @@ namespace NotAMetroidGame
             return false;
         }  
 
+        protected bool OutOfBounds(Player player)
+        {
+            BoundingBox levelbounds = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, height, 0));
+            if (player.bound.Intersects(levelbounds))
+            {
+                return false;
+            }
+            else
+            {
+                Transition(player);
+                return true;
+            }
+        }
+
+        protected abstract void Transition(Player player);
+
         /// <summary>
         /// Calls the Update function for every Structure and Creature in the level.
         /// The camera position is also locked within the boundaries of the level.
@@ -132,6 +150,7 @@ namespace NotAMetroidGame
             {
                 camera.position.Y = height - camera.height;
             }
+            OutOfBounds(player);
         }
 
         /// <summary>
@@ -166,6 +185,12 @@ namespace NotAMetroidGame
             AddObject(new TestFloorSmall(content, 700, 415));
             //AddObject(new Skeleton(content, new Vector2(500, 385)));
             background = content.Load<Texture2D>(BG_NAME);
+        }
+
+        protected override void Transition(Player player)
+        {
+            nextLevel = new Test_00();
+            player.position = new Vector2(Math.Abs(player.position.X % nextLevel.GetWidth()), Math.Abs(player.position.Y % nextLevel.GetHeight()));
         }
     }
 }

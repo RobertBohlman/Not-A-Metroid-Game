@@ -106,7 +106,7 @@ namespace NotAMetroidGame
 
         protected bool OutOfBounds(Player player)
         {
-            BoundingBox levelbounds = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, height, 0));
+            BoundingBox levelbounds = new BoundingBox(new Vector3(-15, -15, 0), new Vector3(width + 15, height + 15, 0));
             if (player.bound.Intersects(levelbounds))
             {
                 return false;
@@ -180,6 +180,8 @@ namespace NotAMetroidGame
         public override void InitMap(ContentManager content)
         {
             AddObject(new TestFloor(content, 0, 500));
+            AddObject(new TestFloor(content, 800, 500));
+            AddObject(new TestFloor(content, -800, 500));
             AddObject(new TestFloorSmall(content, 0, 300));
             AddObject(new TestFloorSmall(content, 200, 415));
             AddObject(new TestFloorSmall(content, 700, 415));
@@ -189,8 +191,58 @@ namespace NotAMetroidGame
 
         protected override void Transition(Player player)
         {
-            nextLevel = new Test_00();
-            player.position = new Vector2(Math.Abs(player.position.X % nextLevel.GetWidth()), Math.Abs(player.position.Y % nextLevel.GetHeight()));
+            if (player.bound.Min.X >= width)
+            {
+                nextLevel = new Test_01();
+            }
+            else
+            {
+                nextLevel = new Test_00();
+            }
+            int levelWidth = nextLevel.GetWidth();
+            int levelHeight = nextLevel.GetHeight();
+
+            float playerSize = player.GetSize().X;
+
+            player.position = new Vector2(Math.Abs((player.position.X + levelWidth) % nextLevel.GetWidth()) + playerSize,
+                Math.Abs((player.position.Y + levelHeight + 1) % nextLevel.GetHeight()));
+        }
+    }
+
+    public class Test_01 : Level
+    {
+        private static string BG_NAME = "test_background";
+
+        public override void InitMap(ContentManager content)
+        {
+            width = 1600;
+            AddObject(new TestFloor(content, 0, 500));
+            AddObject(new TestFloor(content, 800, 500));
+            AddObject(new TestFloor(content, -800, 500));
+            AddObject(new TestFloorSmall(content, 0, 300));
+            AddObject(new TestFloorSmall(content, 200, 415));
+            AddObject(new TestFloorSmall(content, 700, 415));
+            background = content.Load<Texture2D>(BG_NAME);
+        }
+
+        protected override void Transition(Player player)
+        {
+            if (player.bound.Max.X <= 0)
+            {
+                nextLevel = new Test_00();
+            }
+            else
+            {
+                nextLevel = new Test_01();
+            }
+
+            int levelWidth = nextLevel.GetWidth();
+            int levelHeight = nextLevel.GetHeight();
+
+            float playerSize = player.GetSize().X;
+
+            player.position = new Vector2(Math.Abs((player.position.X + levelWidth) % nextLevel.GetWidth()) + playerSize,
+                Math.Abs((player.position.Y + levelHeight + 1) % nextLevel.GetHeight()));
         }
     }
 }

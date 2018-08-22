@@ -199,6 +199,11 @@ namespace NotAMetroidGame
             return this.grounded;
         }
 
+        public Vector2 GetSize()
+        {
+            return size;
+        }
+
         /// <summary>
         /// Logic for enemy AI
         /// Called every update, determine if move/attack, etc.

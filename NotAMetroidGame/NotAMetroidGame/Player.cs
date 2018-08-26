@@ -22,6 +22,8 @@ namespace NotAMetroidGame
         protected float fallMult = 2.5f;
         protected float shortJump = 15f;
 
+        private Weapon equippedWeapon;
+
         Animation walkRight;
         Animation walkLeft;
         Animation jump;
@@ -29,64 +31,65 @@ namespace NotAMetroidGame
         Animation idle;
         Animation hurt;
         Animation attack;
+        private int recoveryTimer;
 
-        public Texture2D swordSprite;
+        //These need to be changed to a less messy solution
+        private Rectangle swingFront;
+        private Rectangle swingRear;
+        private Rectangle recovFront;
+        private Rectangle recovRear;
+
+        //public Texture2D swordSprite;
 
         public Player(Microsoft.Xna.Framework.Content.ContentManager content, Vector2 pos) : base(pos)
         {
             //Init placeholder image
     
-            this.sprite = content.Load<Texture2D>("sprite_base_addon_2012_12_14");
-            this.swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
+            this.sprite = content.Load<Texture2D>("player");
             this.velocity = new Vector2(0, 0);
             this.size = new Vector2(37, 60);
 
-            attacking = false;
-
-            bound = new BoundingBox(new Vector3(position, 0),
-                new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                new Vector3(this.position.X, this.position.Y + 60, 0));
             prevBound = bound;
+
+            this.speedCap = 250;
+            attacking = false;
+            equippedWeapon = new Weapon("Longsword", 450, 5);
 
             //Animation setup
             walkRight = new Animation();
-            walkRight.AddFrame(new Rectangle(20, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(84, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(148, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(212, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(276, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(340, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(404, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(468, 88, 20, 30), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(64, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(113, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(160, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+
 
             //Since we use the same frames for both, no need to assign twice.
             walkLeft = walkRight;
 
             idle = new Animation();
-            idle.AddFrame(new Rectangle(20, 24, 20, 30), TimeSpan.FromSeconds(.25), "idle");
-            idle.AddFrame(new Rectangle(84, 24, 20, 30), TimeSpan.FromSeconds(.25), "idle");
-            idle.AddFrame(new Rectangle(148, 24, 20, 30), TimeSpan.FromSeconds(.25), "idle");
-            idle.AddFrame(new Rectangle(212, 24, 20, 30), TimeSpan.FromSeconds(.25), "idle");
+            idle.AddFrame(new Rectangle(16, 0, 16, 32), TimeSpan.FromSeconds(.25), "idle");
+
 
             jump = new Animation();
-            jump.AddFrame(new Rectangle(148, 149, 20, 30), TimeSpan.FromSeconds(1), "jump");
+            jump.AddFrame(new Rectangle(208, 0, 16, 32), TimeSpan.FromSeconds(1), "jump");
 
-            fall = new Animation();
-            fall.AddFrame(new Rectangle(212, 149, 20, 30), TimeSpan.FromSeconds(1), "fall");
+            fall = jump;
 
             hurt = new Animation();
-            hurt.AddFrame(new Rectangle(148, 280, 20, 30), TimeSpan.FromSeconds(1), "hurt");
+            hurt.AddFrame(new Rectangle(384, 0, 16, 32), TimeSpan.FromSeconds(1), "hurt");
 
             attack = new Animation();
-            attack.AddFrame(new Rectangle(20, 728, 27, 30), TimeSpan.FromSeconds(0.05), "attack");
-            attack.AddFrame(new Rectangle(84, 728, 27, 30), TimeSpan.FromSeconds(0.15), "attack");
-            attack.AddFrame(new Rectangle(148, 728, 27, 30), TimeSpan.FromSeconds(0.25), "attack");
-            attack.AddFrame(new Rectangle(212, 728, 27, 30), TimeSpan.FromSeconds(0.25), "attack");
-            attack.AddFrame(new Rectangle(276, 728, 27, 30), TimeSpan.FromSeconds(0.15), "attack");
-            attack.AddFrame(new Rectangle(340, 728, 27, 30), TimeSpan.FromSeconds(0.05), "attack");
+            attack.AddFrame(new Rectangle(255, 0, 16, 32), TimeSpan.FromSeconds(0.15), "windup");
+            attack.AddFrame(new Rectangle(305, 0, 16, 32), TimeSpan.FromSeconds(0.15), "swing");
+            attack.AddFrame(new Rectangle(352, 0, 16, 32), TimeSpan.FromSeconds(0.15), "recovery");
+
+            swingFront = new Rectangle(320, 0, 16, 32);
+            swingRear = new Rectangle(289, 0, 16, 32);
+            recovFront = new Rectangle(367, 0, 16, 32);
+            recovRear = new Rectangle(336, 0, 16, 32);
 
             currentAnimation = idle;
-
-            this.speedCap = 250;
 
             scaleVector = new Vector2(2.0f, 2.0f);
 
@@ -159,25 +162,36 @@ namespace NotAMetroidGame
             if (attacking)
             {
                 //Default behavior is for the player to stand still while attacking if they're on the ground
-                if (position.Y >= 385)
+                if (this.Grounded())
                     velocity.X = 0;
 
-                attackTimer += gameTime.ElapsedGameTime.Milliseconds;
-                if (facing == 0)
-                {
-                    hit = new BoundingBox(new Vector3(this.position.X + 37, this.position.Y + 20, 0),
-                        new Vector3(this.position.X + 106, this.position.Y + 40, 0));
-                }
-                else
-                {
-                    hit = new BoundingBox(new Vector3(this.position.X - 62, this.position.Y + 20, 0),
-                        new Vector3(this.position.X, this.position.Y + 40, 0));
-                }
+                currentAnimation = attack;
 
-                if (attackTimer > 800)
+                if (String.Equals(currentAnimation.getFrameName(), "swing"))
                 {
-                    attacking = false;
-                    attackTimer = 0;
+                    if (facing == 0)
+                    {
+                        hit = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
+                                     new Vector3(this.position.X + 117, this.position.Y + 60, 0));
+                    }
+                    else
+                    {
+                        hit = new BoundingBox(new Vector3(this.position.X - 80, this.position.Y, 0),
+                                    new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+                    }
+                }
+                else if (String.Equals(currentAnimation.getFrameName(), "recovery"))
+                {
+                    hit = new BoundingBox(new Vector3(0, 0, 0),
+                                    new Vector3(0, 0, 0));
+                    recoveryTimer += gameTime.ElapsedGameTime.Milliseconds;
+
+                    if (recoveryTimer >= 150)
+                    {
+                        recoveryTimer = 0;
+                        attacking = false;
+                        currentAnimation.Reset();
+                    }
                 }
 
             }
@@ -220,30 +234,40 @@ namespace NotAMetroidGame
         {
             base.Draw(spriteBatch, camera);
 
-            if (attacking)
+            //Draw the supplemental attack sprites for animation.
+            if (String.Equals(currentAnimation.getFrameName(), "swing"))
             {
-                if (this.facing == 0)
+                if (facing == 0)
                 {
-                    spriteBatch.Draw(swordSprite, Vector2.Subtract(new Vector2(this.position.X + 37, this.position.Y + 20), camera.position), null, Color.White,
-                        0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.None, 0);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(16, 0), Vector2.Subtract(position, camera.position)), swingFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-16, 0), Vector2.Subtract(position, camera.position)), swingRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
                 }
                 else
                 {
-                    spriteBatch.Draw(swordSprite, Vector2.Subtract(new Vector2(this.position.X - 62, this.position.Y + 20), camera.position), null, Color.White, 
-                        0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.FlipHorizontally, 0);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-16, 0), Vector2.Subtract(position, camera.position)), swingFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(16, 0), Vector2.Subtract(position, camera.position)), swingRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
                 }
             }
-        }
+            else if (String.Equals(currentAnimation.getFrameName(), "recovery"))
+            {
+                if (facing == 0)
+                {
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(16, 0), Vector2.Subtract(position, camera.position)), recovFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-16, 0), Vector2.Subtract(position, camera.position)), recovRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                }
+                else
+                {
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-16, 0), Vector2.Subtract(position, camera.position)), recovFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(16, 0), Vector2.Subtract(position, camera.position)), recovRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                }
+            }
 
-        public void SetFacing(int facing)
-        {
-            this.facing = facing;
         }
 
         /**
          * Override from Creature.Damage 
          **/
-        public override bool Damage(long damage, bool knockback)
+        public override bool Damage(Weapon source, bool knockback)
         {
             if (knockback)
             {
@@ -265,6 +289,18 @@ namespace NotAMetroidGame
             //Damage numerical calculation happens here
 
             return false;
+        }
+
+        //Getters and Setters
+
+        public Weapon getWeapon()
+        {
+            return this.equippedWeapon;
+        }
+
+        public void SetFacing(int facing)
+        {
+            this.facing = facing;
         }
 
         public override void Action(GameTime gameTime, Player player)

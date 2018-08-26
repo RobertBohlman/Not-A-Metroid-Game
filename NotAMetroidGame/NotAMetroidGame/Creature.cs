@@ -28,6 +28,8 @@ namespace NotAMetroidGame
 
         //Cap for horizontal speed.
         public int speedCap;
+
+        protected Weapon body;
         
         protected bool grounded;
 
@@ -70,7 +72,7 @@ namespace NotAMetroidGame
          * but certain environmental hazards may not).
          * 
          **/
-        public virtual bool Damage(long damage, bool knockback)
+        public virtual bool Damage(Weapon source, bool knockback)
         {
 
             return false;
@@ -202,6 +204,10 @@ namespace NotAMetroidGame
         public Vector2 GetSize()
         {
             return size;
+        }
+        public Weapon getBody()
+        {
+            return this.body;
         }
 
         /// <summary>

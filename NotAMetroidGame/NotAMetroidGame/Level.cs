@@ -22,6 +22,12 @@ namespace NotAMetroidGame
         protected int width;
         protected int height;
 
+        //Set to true when level is finished. 
+        protected bool isOver;
+
+        //Set to true to inform Game1 to not allow player controls and camera updates.
+        protected bool isPlayingCutscene;
+
         //Spawn location for the player
         // This should be set in InitMap()
         protected Vector2 spawn_location = new Vector2(10, 60);
@@ -34,7 +40,7 @@ namespace NotAMetroidGame
         //The creatures located in this map
         protected List<Creature> creatures;
 
-        public Level nextLevel;
+        protected Level nextLevel;
 
         public Level()
         {
@@ -42,6 +48,8 @@ namespace NotAMetroidGame
             creatures = new List<Creature>();
             width = DEFAULT_WIDTH;
             height = DEFAULT_HEIGHT;
+            isOver = false;
+            isPlayingCutscene = false;
         }
 
         // Getters
@@ -66,14 +74,14 @@ namespace NotAMetroidGame
             return height;
         }
 
-        /// <summary>
-        /// Returns the creature list for the level
-        /// Note this isn't safe encapsulation (list is mutable)
-        /// </summary>
-        /// <returns>The level's list of creatures</returns>
         public List<Creature> GetCreatures()
         {
             return this.creatures;
+        }
+
+        public Level GetNextLevel()
+        {
+            return nextLevel;
         }
 
         /// <summary>
@@ -104,6 +112,11 @@ namespace NotAMetroidGame
             return false;
         }  
 
+        /// <summary>
+        /// Returns true if the player is currently out of the current level's boundaries, false otherwise.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
         protected bool OutOfBounds(Player player)
         {
             BoundingBox levelbounds = new BoundingBox(new Vector3(-15, -15, 0), new Vector3(width + 15, height + 15, 0));
@@ -116,6 +129,26 @@ namespace NotAMetroidGame
                 Transition(player);
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Returns whether or not the level is ready to be replaced by another level.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsOver()
+        {
+            if (isOver && nextLevel == null)
+            {
+                //If level is transitioning but has not set the next level, nextLevel
+                //is set to avoid crashing.
+                nextLevel = new Test_00();
+            }
+            return isOver;
+        }
+
+        public bool IsPlayingCutscene()
+        {
+            return isPlayingCutscene;
         }
 
         protected abstract void Transition(Player player);
@@ -185,7 +218,7 @@ namespace NotAMetroidGame
             AddObject(new TestFloorSmall(content, 0, 300));
             AddObject(new TestFloorSmall(content, 200, 415));
             AddObject(new TestFloorSmall(content, 700, 415));
-            AddObject(new Skeleton(content, new Vector2(500, 385)));
+            //AddObject(new Skeleton(content, new Vector2(500, 385)));
             background = content.Load<Texture2D>(BG_NAME);
         }
 
@@ -239,10 +272,6 @@ namespace NotAMetroidGame
             int levelWidth = nextLevel.GetWidth();
             int levelHeight = nextLevel.GetHeight();
 
-            float playerSize = player.GetSize().X;
-
-            player.position = new Vector2(Math.Abs((player.position.X + levelWidth) % nextLevel.GetWidth()) + playerSize,
-                Math.Abs((player.position.Y + levelHeight + 1) % nextLevel.GetHeight()));
         }
     }
 }

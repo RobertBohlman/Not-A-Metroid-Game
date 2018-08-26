@@ -10,6 +10,8 @@ namespace NotAMetroidGame
         //Direction the skeleton is patrolling 0 = right, 1 = left
         private int path;
 
+        private Weapon sword;
+
         //Animations
         private Animation stopped;
         private Animation walking;
@@ -42,6 +44,9 @@ namespace NotAMetroidGame
             bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
                 new Vector3(this.position.X + 37, this.position.Y + 60, 0));
             prevBound = bound;
+
+            sword = new Weapon("Skeleton sword", 0, 3);
+            this.body = new Weapon("Skeleton body", 0, 1);
 
             path = 0;
 

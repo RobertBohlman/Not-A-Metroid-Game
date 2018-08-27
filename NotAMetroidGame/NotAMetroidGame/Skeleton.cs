@@ -26,44 +26,60 @@ namespace NotAMetroidGame
         //How long the skeleton spends recovering after a swing
         private float recoveryTimer;
 
-        public Texture2D swordSprite;
+        public float width = 16;
+        public float height = 64;
 
         //Speed constants
         private readonly Vector2 RIGHT = new Vector2(150, 0);
         private readonly Vector2 LEFT = new Vector2(-150, 0);
 
+        //These need to be changed to a less messy solution
+        private Rectangle windupRear;
+        private Rectangle swingFront;
+        private Rectangle swingRear;
+        private Rectangle recovFront;
+        private Rectangle recovRear;
+
         public Skeleton(Microsoft.Xna.Framework.Content.ContentManager content, Vector2 pos) : base(pos)
         {
             //Variable setup
-            sprite = sprite = content.Load<Texture2D>("orc_skeleton_single");
-            swordSprite = content.Load<Texture2D>("imageedit_1_2417391721");
+            this.sprite = content.Load<Texture2D>("player");
             velocity = new Vector2(0, 0);
             size = new Vector2(45, 55);
             speedCap = 80;
 
             bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+                new Vector3(this.position.X, this.position.Y + 60, 0));
             prevBound = bound;
 
-            sword = new Weapon("Skeleton sword", 0, 3);
-            this.body = new Weapon("Skeleton body", 0, 1);
+            sword = new Weapon("Skeleton sword", -1, 3);
+            this.body = new Weapon("Skeleton body", -1, 1);
 
             path = 0;
 
-            tint = Color.White;
-
             //Animation setup
             stopped = new Animation();
-            stopped.AddFrame(new Rectangle(0, 0, 66, 96), TimeSpan.FromSeconds(1), "stopped");
+            stopped.AddFrame(new Rectangle(16, 0, 16, 32), TimeSpan.FromSeconds(.25), "stopped");
 
-            walking = stopped;
+            walking = new Animation();
+            walking.AddFrame(new Rectangle(64, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            walking.AddFrame(new Rectangle(112, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            walking.AddFrame(new Rectangle(160, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
 
             swing = new Animation();
-            swing.AddFrame(new Rectangle(0, 0, 66, 96), TimeSpan.FromSeconds(0.70), "windup");
-            swing.AddFrame(new Rectangle(0, 0, 66, 96), TimeSpan.FromSeconds(0.33), "swing");
-            swing.AddFrame(new Rectangle(0, 0, 66, 96), TimeSpan.FromSeconds(1), "recovery");
+            swing.AddFrame(new Rectangle(448, 0, 16, 32), TimeSpan.FromSeconds(0.70), "windup");
+            swing.AddFrame(new Rectangle(496, 0, 16, 32), TimeSpan.FromSeconds(0.15), "swing");
+            swing.AddFrame(new Rectangle(544, 0, 16, 32), TimeSpan.FromSeconds(1), "recovery");
 
-            scaleVector = new Vector2(0.7f, 0.7f);
+            windupRear = new Rectangle(432, 0, 16, 32);
+            swingFront = new Rectangle(512, 0, 16, 32);
+            swingRear = new Rectangle(480, 0, 16, 32);
+            recovFront = new Rectangle(560, 0, 16, 32);
+            recovRear = new Rectangle(528, 0, 16, 32);
+
+            scaleVector = new Vector2(2.4f, 2.0f);
+
+            tint = Color.Brown;
         }
 
         /**The skeleton's basic attack
@@ -139,39 +155,35 @@ namespace NotAMetroidGame
             base.Update(gameTime, map, player);
             collided = Collision(map);
 
+            this.tint = Color.Brown;
+
             if (attacking)
             {
                 currentAnimation = swing;
-
-                if (String.Equals(currentAnimation.getFrameName(), "windup"))
-                {
-                    tint = Color.Blue;
-                }
-                else if (String.Equals(currentAnimation.getFrameName(), "swing"))
+                if (String.Equals(currentAnimation.getFrameName(), "swing"))
                 {
                     if (facing == 0)
                     {
-                        hit = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                                     new Vector3(this.position.X + 117, this.position.Y + 60, 0));
+                        hit = new BoundingBox(new Vector3(this.position.X + 38, this.position.Y, 0),
+                                     new Vector3(this.position.X + 76, this.position.Y + 30, 0));
                     }
                     else
                     {
-                        hit = new BoundingBox(new Vector3(this.position.X - 80, this.position.Y, 0),
-                                    new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+                        hit = new BoundingBox(new Vector3(this.position.X - 36, this.position.Y, 0),
+                                    new Vector3(this.position.X, this.position.Y + 30, 0));
                     }
                 }
                 else if (String.Equals(currentAnimation.getFrameName(), "recovery"))
                 {
                     hit = new BoundingBox(new Vector3(0, 0, 0),
                                     new Vector3(0, 0, 0));
-                    tint = Color.Yellow;
                     recoveryTimer += gameTime.ElapsedGameTime.Milliseconds;
 
                     if (recoveryTimer >= 700)
                     {
                         recoveryTimer = 0;
+                        this.tint = Color.Brown;
                         attacking = false;
-                        tint = Color.White;
                         currentAnimation.Reset();
                         currentAnimation = stopped;
                     }
@@ -194,17 +206,38 @@ namespace NotAMetroidGame
         {
             base.Draw(spriteBatch, camera);
 
-            if (String.Equals(currentAnimation.getFrameName(), "swing"))
+            //Draw the supplemental attack sprites for animation.
+            if (String.Equals(currentAnimation.getFrameName(), "windup"))
             {
-                if (this.facing == 0)
+                if (facing == 0)
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), windupRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                else
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), windupRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+            }
+            else if (String.Equals(currentAnimation.getFrameName(), "swing"))
+            {
+                if (facing == 0)
                 {
-                    spriteBatch.Draw(swordSprite, Vector2.Subtract(new Vector2(this.position.X + 37, this.position.Y + 20), camera.position), null, Color.White,
-                        0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.None, 0);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), swingFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), swingRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
                 }
                 else
                 {
-                    spriteBatch.Draw(swordSprite, Vector2.Subtract(new Vector2(this.position.X - 62, this.position.Y + 20), camera.position), null, Color.White,
-                        0, Vector2.Zero, new Vector2(0.5f, 0.5f), SpriteEffects.FlipHorizontally, 0);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), swingFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), swingRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                }
+            }
+            else if (String.Equals(currentAnimation.getFrameName(), "recovery"))
+            {
+                if (facing == 0)
+                {
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), recovFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), recovRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                }
+                else
+                {
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), recovFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), recovRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
                 }
             }
         }

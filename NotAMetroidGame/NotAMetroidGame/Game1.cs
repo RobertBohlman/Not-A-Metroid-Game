@@ -102,7 +102,7 @@ namespace NotAMetroidGame
                 if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.Grounded())
                     player.Move(JUMP, gameTime);
 
-                if (kstate.IsKeyDown(Keys.Space))
+                if (kstate.IsKeyDown(Keys.Space) && !OldKeyState.IsKeyDown(Keys.Space))
                     player.Attack(gameTime);
 
                 if (kstate.IsKeyUp(Keys.Left) && OldKeyState.IsKeyDown(Keys.Left))
@@ -122,18 +122,17 @@ namespace NotAMetroidGame
                 foreach (Creature enemy in level.GetCreatures())
                 {
                     if (player.hit.Intersects(enemy.bound))
-                        Debug.WriteLine("HIT");
+                        enemy.Damage(player.equippedWeapon, false);
                 }   
             }
 
             //Enemy to player hit detection.
             foreach (Creature enemy in level.GetCreatures())
             {
-                if ((enemy.bound.Intersects(player.bound) || enemy.hit.Intersects(player.bound)) && !player.invuln)
+                if ((enemy.bound.Intersects(player.bound) || enemy.hit.Intersects(player.bound)))
                     player.Damage(enemy.getBody(), true);
             }
             
-            Debug.WriteLine("");
             base.Update(gameTime);
         }
 

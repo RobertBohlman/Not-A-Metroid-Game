@@ -37,6 +37,9 @@ namespace NotAMetroidGame
 
         public BoundingBox prevBound;
 
+        //The last thing this creature took damage from.
+        protected Weapon lastDamaged;
+
         //bounding box of attack
         public BoundingBox hit;
 
@@ -74,7 +77,12 @@ namespace NotAMetroidGame
          **/
         public virtual bool Damage(Weapon source, bool knockback)
         {
-
+            if (!invuln)
+            {
+                lastDamaged = source;
+                this.tint = Color.Green;
+                invuln = true;
+            }
             return false;
 
         }
@@ -114,11 +122,20 @@ namespace NotAMetroidGame
             this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
 
             prevBound = bound;
-            bound = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                        new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+            UpdateBounds();
 
-            feet = new BoundingBox(new Vector3(this.position.X, this.position.Y + 60, 0),
-                new Vector3(this.position.X + 16, this.position.Y + 70, 0));
+            //invuln timer
+            if (invuln)
+            {
+                this.invulnTimer += gameTime.ElapsedGameTime.Milliseconds;
+
+                if (invulnTimer > lastDamaged.invulnTime)
+                {
+                    //Debug.WriteLine("Invuln ended");
+                    this.invuln = false;
+                    this.invulnTimer = 0;
+                }
+            }
 
         }
 
@@ -185,7 +202,7 @@ namespace NotAMetroidGame
         }
 
         /// <summary>
-        /// Updates the BoundingBoxes to the player's position.
+        /// Updates the BoundingBoxes to the creature's position.
         /// </summary>
         private void UpdateBounds()
         {
@@ -204,6 +221,11 @@ namespace NotAMetroidGame
         public Weapon getBody()
         {
             return this.body;
+        }
+
+        public void setTint(Color tint)
+        {
+            this.tint = tint;
         }
 
         /// <summary>

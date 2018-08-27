@@ -22,7 +22,7 @@ namespace NotAMetroidGame
         protected float fallMult = 2.5f;
         protected float shortJump = 15f;
 
-        private Weapon equippedWeapon;
+        public Weapon equippedWeapon;
 
         Animation walkRight;
         Animation walkLeft;
@@ -39,8 +39,6 @@ namespace NotAMetroidGame
         private Rectangle recovFront;
         private Rectangle recovRear;
 
-        //public Texture2D swordSprite;
-
         public Player(Microsoft.Xna.Framework.Content.ContentManager content, Vector2 pos) : base(pos)
         {
             //Init placeholder image
@@ -55,12 +53,12 @@ namespace NotAMetroidGame
 
             this.speedCap = 250;
             attacking = false;
-            equippedWeapon = new Weapon("Longsword", 450, 5);
+            equippedWeapon = new Weapon("Longsword", 150, 5);
 
             //Animation setup
             walkRight = new Animation();
             walkRight.AddFrame(new Rectangle(64, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(113, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            walkRight.AddFrame(new Rectangle(112, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
             walkRight.AddFrame(new Rectangle(160, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
 
 
@@ -77,21 +75,21 @@ namespace NotAMetroidGame
             fall = jump;
 
             hurt = new Animation();
-            hurt.AddFrame(new Rectangle(384, 0, 16, 32), TimeSpan.FromSeconds(1), "hurt");
+            hurt.AddFrame(new Rectangle(398, 0, 16, 32), TimeSpan.FromSeconds(1), "hurt");
 
             attack = new Animation();
-            attack.AddFrame(new Rectangle(255, 0, 16, 32), TimeSpan.FromSeconds(0.15), "windup");
-            attack.AddFrame(new Rectangle(305, 0, 16, 32), TimeSpan.FromSeconds(0.15), "swing");
+            attack.AddFrame(new Rectangle(256, 0, 16, 32), TimeSpan.FromSeconds(0.15), "windup");
+            attack.AddFrame(new Rectangle(304, 0, 16, 32), TimeSpan.FromSeconds(0.15), "swing");
             attack.AddFrame(new Rectangle(352, 0, 16, 32), TimeSpan.FromSeconds(0.15), "recovery");
 
             swingFront = new Rectangle(320, 0, 16, 32);
-            swingRear = new Rectangle(289, 0, 16, 32);
-            recovFront = new Rectangle(367, 0, 16, 32);
+            swingRear = new Rectangle(288, 0, 16, 32);
+            recovFront = new Rectangle(368, 0, 16, 32);
             recovRear = new Rectangle(336, 0, 16, 32);
 
             currentAnimation = idle;
 
-            scaleVector = new Vector2(2.0f, 2.0f);
+            scaleVector = new Vector2(2.4f, 2.0f);
 
             tint = Color.White;
         }
@@ -145,18 +143,9 @@ namespace NotAMetroidGame
             }
 
             if (invuln)
-            {
-                this.invulnTimer += gameTime.ElapsedGameTime.Milliseconds;
                 this.tint = Color.Red;
-
-                if (invulnTimer > 800)
-                {
-                    //Debug.WriteLine("Invuln ended");
-                    this.tint = Color.White;
-                    this.invuln = false;
-                    this.invulnTimer = 0;
-                }
-            }
+            else
+                this.tint = Color.White;
 
             //Attack code
             if (attacking)
@@ -171,13 +160,13 @@ namespace NotAMetroidGame
                 {
                     if (facing == 0)
                     {
-                        hit = new BoundingBox(new Vector3(this.position.X, this.position.Y, 0),
-                                     new Vector3(this.position.X + 117, this.position.Y + 60, 0));
+                        hit = new BoundingBox(new Vector3(this.position.X + 38, this.position.Y, 0),
+                                     new Vector3(this.position.X + 76, this.position.Y + 30, 0));
                     }
                     else
                     {
-                        hit = new BoundingBox(new Vector3(this.position.X - 80, this.position.Y, 0),
-                                    new Vector3(this.position.X + 37, this.position.Y + 60, 0));
+                        hit = new BoundingBox(new Vector3(this.position.X - 36, this.position.Y, 0),
+                                    new Vector3(this.position.X, this.position.Y + 30, 0));
                     }
                 }
                 else if (String.Equals(currentAnimation.getFrameName(), "recovery"))
@@ -186,7 +175,7 @@ namespace NotAMetroidGame
                                     new Vector3(0, 0, 0));
                     recoveryTimer += gameTime.ElapsedGameTime.Milliseconds;
 
-                    if (recoveryTimer >= 150)
+                    if (recoveryTimer >= 120)
                     {
                         recoveryTimer = 0;
                         attacking = false;
@@ -239,26 +228,26 @@ namespace NotAMetroidGame
             {
                 if (facing == 0)
                 {
-                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(16, 0), Vector2.Subtract(position, camera.position)), swingFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
-                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-16, 0), Vector2.Subtract(position, camera.position)), swingRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), swingFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), swingRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
                 }
                 else
                 {
-                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-16, 0), Vector2.Subtract(position, camera.position)), swingFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
-                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(16, 0), Vector2.Subtract(position, camera.position)), swingRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), swingFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), swingRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
                 }
             }
             else if (String.Equals(currentAnimation.getFrameName(), "recovery"))
             {
                 if (facing == 0)
                 {
-                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(16, 0), Vector2.Subtract(position, camera.position)), recovFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
-                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-16, 0), Vector2.Subtract(position, camera.position)), recovRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), recovFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), recovRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.None, 0f);
                 }
                 else
                 {
-                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-16, 0), Vector2.Subtract(position, camera.position)), recovFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
-                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(16, 0), Vector2.Subtract(position, camera.position)), recovRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(-38, 0), Vector2.Subtract(position, camera.position)), recovFront, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
+                    spriteBatch.Draw(sprite, Vector2.Add(new Vector2(38, 0), Vector2.Subtract(position, camera.position)), recovRear, tint, 0, Vector2.Zero, scaleVector, SpriteEffects.FlipHorizontally, 0f);
                 }
             }
 
@@ -269,25 +258,27 @@ namespace NotAMetroidGame
          **/
         public override bool Damage(Weapon source, bool knockback)
         {
-            if (knockback)
+            if (!invuln)
             {
-                recoil = true;
-                invuln = true;
-                Vector2 newVel = Vector2.Zero;  
-
-                if (velocity.Y > 0)
+                if (knockback)
                 {
-                    if (this.getFacing() == 0)
-                        newVel.X = -450;
-                    else if (this.getFacing() == 1)
-                        newVel.X = 450;
-                    newVel.Y = -800;
+                    lastDamaged = source;
+                    recoil = true;
+                    invuln = true;
+                    Vector2 newVel = Vector2.Zero;
+
+                    if (velocity.Y > 0)
+                    {
+                        if (this.getFacing() == 0)
+                            newVel.X = -450;
+                        else if (this.getFacing() == 1)
+                            newVel.X = 450;
+                        newVel.Y = -800;
+                    }
+                    velocity = newVel;
                 }
-                velocity = newVel;
+                //Damage numerical calculation happens here
             }
-
-            //Damage numerical calculation happens here
-
             return false;
         }
 

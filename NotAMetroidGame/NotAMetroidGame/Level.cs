@@ -180,10 +180,10 @@ namespace NotAMetroidGame
         public override void InitMap(ContentManager content)
         {
             AddObject(new TestFloor(content, 0, 500));
-            AddObject(new TestFloorSmall(content, 0, 300));
-            AddObject(new TestFloorSmall(content, 200, 415));
-            AddObject(new TestFloorSmall(content, 700, 415));
-            AddObject(new Skeleton(content, new Vector2(500, 385)));
+            //AddObject(new TestFloorSmall(content, 0, 300));
+            //AddObject(new TestFloorSmall(content, 200, 415));
+            //AddObject(new TestFloorSmall(content, 700, 415));
+            //AddObject(new Skeleton(content, new Vector2(500, 385)));
             background = content.Load<Texture2D>(BG_NAME);
         }
 

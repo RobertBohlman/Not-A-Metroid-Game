@@ -18,17 +18,11 @@ namespace NotAMetroidGame
         public float width = 16;
         public float height = 64;
 
-        //Jump modifiers
-        protected float fallMult = 2.5f;
-        protected float shortJump = 15f;
-
         public Weapon equippedWeapon;
 
-        Animation walkRight;
-        Animation walkLeft;
-        Animation jump;
+        //Animation walkRight;
+        //Animation walkLeft;
         Animation fall;
-        Animation idle;
         Animation hurt;
         Animation attack;
         private int recoveryTimer;
@@ -55,24 +49,33 @@ namespace NotAMetroidGame
             attacking = false;
             equippedWeapon = new Weapon("Longsword", 150, 5);
 
+
+            //Setup dictionary for states
+            stateList = new Dictionary<String, State>();
+            stateList.Add("Idle", new IdleState(this));
+            stateList.Add("Walk", new WalkState(this));
+            stateList.Add("Airborne", new JumpState(this));
+
+
+
             //Animation setup
-            walkRight = new Animation();
-            walkRight.AddFrame(new Rectangle(64, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(112, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
-            walkRight.AddFrame(new Rectangle(160, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            //walkRight = new Animation();
+           // walkRight.AddFrame(new Rectangle(64, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            //walkRight.AddFrame(new Rectangle(112, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            //walkRight.AddFrame(new Rectangle(160, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
 
 
             //Since we use the same frames for both, no need to assign twice.
-            walkLeft = walkRight;
+            //walkLeft = walkRight;
 
-            idle = new Animation();
-            idle.AddFrame(new Rectangle(16, 0, 16, 32), TimeSpan.FromSeconds(.25), "idle");
+            //idle = new Animation();
+            //idle.AddFrame(new Rectangle(16, 0, 16, 32), TimeSpan.FromSeconds(.25), "idle");
 
 
-            jump = new Animation();
-            jump.AddFrame(new Rectangle(208, 0, 16, 32), TimeSpan.FromSeconds(1), "jump");
+            //jump = new Animation();
+            //jump.AddFrame(new Rectangle(208, 0, 16, 32), TimeSpan.FromSeconds(1), "jump");
 
-            fall = jump;
+           // fall = jump;
 
             hurt = new Animation();
             hurt.AddFrame(new Rectangle(398, 0, 16, 32), TimeSpan.FromSeconds(1), "hurt");
@@ -87,7 +90,8 @@ namespace NotAMetroidGame
             recovFront = new Rectangle(368, 0, 16, 32);
             recovRear = new Rectangle(336, 0, 16, 32);
 
-            currentAnimation = idle;
+            //currentAnimation = idle;
+            changeState("Idle");
 
             scaleVector = new Vector2(2.4f, 2.0f);
 
@@ -112,17 +116,6 @@ namespace NotAMetroidGame
         {
             base.Update(gameTime, map, player);
             Collision(map);
-
-            if (velocity.Y > 0)
-            {
-                this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (fallMult - 1));
-                currentAnimation = fall;
-            }
-            else if (this.velocity.Y < 0 && Keyboard.GetState().IsKeyUp(Keys.Up))
-            {
-                this.velocity = Vector2.Add(this.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (shortJump - 1));
-                currentAnimation = fall;
-            }
 
             //Recoil and invulnerability timers
             if (recoil)
@@ -185,14 +178,14 @@ namespace NotAMetroidGame
 
             }
 
-            //Animations
+           /* //Animations
             if (Keyboard.GetState().IsKeyDown(Keys.Right) && grounded)
             {
-                currentAnimation = walkRight;
+                //currentAnimation = walkRight;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.Left) && grounded)
             {
-                currentAnimation = walkLeft;
+                //currentAnimation = walkLeft;
             }
             else if (grounded)
             {
@@ -216,7 +209,7 @@ namespace NotAMetroidGame
             if (this.recoil)
                 currentAnimation = hurt;
 
-            currentAnimation.Update(gameTime);
+            //currentAnimation.Update(gameTime); */
         }
 
         public override void Draw(SpriteBatch spriteBatch, Camera camera)
@@ -287,11 +280,6 @@ namespace NotAMetroidGame
         public Weapon getWeapon()
         {
             return this.equippedWeapon;
-        }
-
-        public void SetFacing(int facing)
-        {
-            this.facing = facing;
         }
 
         public override void Action(GameTime gameTime, Player player)

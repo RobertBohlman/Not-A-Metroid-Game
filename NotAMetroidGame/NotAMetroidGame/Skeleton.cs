@@ -133,12 +133,12 @@ namespace NotAMetroidGame
                 if (path == 1)
                 {
                     facing = 1;
-                    this.Move(LEFT, gameTime);
+                    this.Move(LEFT);
                 }
                 else if (path == 0)
                 {
                     facing = 0;
-                    this.Move(RIGHT, gameTime);
+                    this.Move(RIGHT);
                 }
                 else if (path == 2)
                 {

@@ -82,36 +82,30 @@ namespace NotAMetroidGame
                 level.InitMap(Content);
             }
             //Player controls
-            var kstate = Keyboard.GetState();
-            
-            if (kstate.IsKeyDown(Keys.Right) && !player.recoil && (!player.Grounded() || !player.attacking))
-            {
-                player.SetFacing(0);
-                player.Move(RIGHT, gameTime);
-            }
+            //var kstate = Keyboard.GetState();
 
-            if (kstate.IsKeyDown(Keys.Left) && !player.recoil && (!player.Grounded() || !player.attacking))
-            {
-                player.SetFacing(1);
-                player.Move(LEFT, gameTime);
-            }
+            //if (kstate.IsKeyDown(Keys.Right) && !player.recoil && (!player.Grounded() || !player.attacking))
+            //{
+                //player.SetFacing(0);
+               // player.Move(RIGHT, gameTime);
+            //}
+
+            //if (kstate.IsKeyDown(Keys.Left) && !player.recoil && (!player.Grounded() || !player.attacking))
+            //{
+                //player.SetFacing(1);
+                //player.Move(LEFT, gameTime);
+           // }
                 
 
-            if (!player.attacking && !player.recoil)
+           /* if (!player.attacking && !player.recoil)
             {
                 if (kstate.IsKeyDown(Keys.Up) && OldKeyState.IsKeyUp(Keys.Up) && player.Grounded())
                     player.Move(JUMP, gameTime);
 
                 if (kstate.IsKeyDown(Keys.Space) && !OldKeyState.IsKeyDown(Keys.Space))
                     player.Attack(gameTime);
-
-                if (kstate.IsKeyUp(Keys.Left) && OldKeyState.IsKeyDown(Keys.Left))
-                    player.velocity.X = 0;
-
-                if (kstate.IsKeyUp(Keys.Right) && OldKeyState.IsKeyDown(Keys.Right))
-                    player.velocity.X = 0;
-            }
-            OldKeyState = kstate;
+            } */
+            //OldKeyState = kstate;
             player.Update(gameTime, level, player);
             camera.Update(player.position, graphics);
             level.Update(gameTime, player, camera);

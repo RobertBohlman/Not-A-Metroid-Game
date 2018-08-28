@@ -46,6 +46,11 @@ namespace NotAMetroidGame
         //Size of the creature
         protected Vector2 size;
 
+        //Creature's current state
+        private State currentState;
+
+        protected IDictionary<String, State> stateList;
+
         public Creature(Vector2 pos)
         {
             this.position = pos;
@@ -56,7 +61,7 @@ namespace NotAMetroidGame
         /// </summary>
         /// <param name="movement"></param>
         /// <param name="gameTime"></param>
-        public void Move(Vector2 movement, GameTime gameTime)
+        public void Move(Vector2 movement)
         {
             this.velocity = Vector2.Add(this.velocity, movement);
         }
@@ -105,6 +110,9 @@ namespace NotAMetroidGame
         /// <param name="player">Player reference, used for enemy AI</param>
         public virtual void Update(GameTime gameTime, Level map, Player player)
         {
+            currentState.Update(gameTime);
+            Debug.WriteLine(this.velocity.X);
+
             this.prevPosition = new Vector2(this.position.X, this.position.Y);
             
             if (Math.Abs(this.velocity.X) > this.speedCap)
@@ -136,7 +144,7 @@ namespace NotAMetroidGame
                     this.invulnTimer = 0;
                 }
             }
-
+            
         }
 
         /// <summary>
@@ -227,6 +235,33 @@ namespace NotAMetroidGame
         {
             this.tint = tint;
         }
+
+        public void SetAnimation(Animation newAnimation)
+        {
+            currentAnimation = newAnimation;
+        }
+
+        public Animation GetAnimation()
+        {
+            return currentAnimation;
+        }
+
+        public void changeState(String stateName)
+        {
+            State newState = stateList[stateName];
+
+            if (currentState != null)
+                currentState.Exit();
+
+            currentState = newState;
+            currentState.Enter();
+        }
+
+        public void SetFacing(int newFacing)
+        {
+            this.facing = newFacing;
+        }
+
 
         /// <summary>
         /// Logic for enemy AI

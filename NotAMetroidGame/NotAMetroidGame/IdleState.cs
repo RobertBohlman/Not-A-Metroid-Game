@@ -7,6 +7,7 @@ namespace NotAMetroidGame
 {
     public class IdleState : State
     {
+        //Movement constants.
         public static readonly Vector2 JUMP = new Vector2(0, -600);
 
         public IdleState(Creature owner) : base(owner)
@@ -18,13 +19,8 @@ namespace NotAMetroidGame
         public override void Enter()
         {
             base.Enter();
-            Debug.WriteLine("Resetting Velocity");
             owner.velocity.X = 0;
-        }
 
-        public override void Exit()
-        {
-            base.Exit();
         }
 
         public override void Update(GameTime gameTime)
@@ -52,13 +48,14 @@ namespace NotAMetroidGame
             }
             else if (kstate.IsKeyDown(Keys.Up))
             {
+                owner.Move(JUMP);
                 return "Jump";
             }
             else if (kstate.IsKeyDown(Keys.Space))
             {
                 return "Attack";
             }
-            else if (owner.velocity.Y > 0)
+            else if (!owner.Grounded())
             {
                 return "Fall";
             }

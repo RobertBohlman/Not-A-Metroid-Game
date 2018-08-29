@@ -8,9 +8,10 @@ namespace NotAMetroidGame
         //Reference to the creature this state belongs to.
         protected Creature owner;
 
-        //The individual state's animation, set in contructor
+        //The individual state's animation, set in contructor.
         protected Animation animation;
 
+        //String representing the new state to change to.
         protected String stateChange;
 
         protected State(Creature owner)

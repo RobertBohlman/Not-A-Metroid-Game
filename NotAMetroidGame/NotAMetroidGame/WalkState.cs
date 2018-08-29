@@ -29,12 +29,6 @@ namespace NotAMetroidGame
             entryKState = Keyboard.GetState();
         }
 
-        public override void Exit()
-        {
-            base.Exit();
-            
-        }
-
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -63,13 +57,14 @@ namespace NotAMetroidGame
             }
             else if (kstate.IsKeyDown(Keys.Up))
             {
+                owner.Move(JUMP);
                 return "Jump";
             }
             else if (kstate.IsKeyDown(Keys.Space))
             {
                 return "Attack";
             }
-            else if (owner.velocity.Y > 0)
+            else if (!owner.Grounded())
             {
                 return "Fall";
             }

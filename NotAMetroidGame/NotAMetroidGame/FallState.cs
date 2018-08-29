@@ -77,6 +77,8 @@ namespace NotAMetroidGame
                 return "Idle";
             else if (owner.Grounded())
                 return "Walk";
+            else if (kstate.IsKeyDown(Keys.Space))
+                return "Attack";
             else
                 return null;
         }

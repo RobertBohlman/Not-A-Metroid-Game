@@ -1,11 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using System;
 
 namespace NotAMetroidGame
 {
     public class AttackState : State
     {
+        //How long until we return control to the player.
         private int recoveryTimer;
+
+        //Moevement constants.
+        private static readonly Vector2 RIGHT = new Vector2(250, 0);
+        private static readonly Vector2 LEFT = new Vector2(-250, 0);
 
         public AttackState(Creature owner) : base(owner)
         {
@@ -16,22 +22,21 @@ namespace NotAMetroidGame
             recoveryTimer = 0;
         }
 
-        public override void Enter()
-        {
-            base.Enter();
-        }
-
-        public override void Exit()
-        {
-            base.Exit();
-        }
-
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            if (owner.Grounded())
-                owner.velocity.X = 0;
+            if (!owner.Grounded())
+            {
+                KeyboardState kstate = Keyboard.GetState();
+
+                if (kstate.IsKeyDown(Keys.Right))
+                    owner.Move(RIGHT);
+                else if (kstate.IsKeyDown(Keys.Left))
+                    owner.Move(LEFT);
+                else
+                    owner.velocity.X = 0;
+            } 
 
             if (String.Equals(animation.getFrameName(), "swing"))
             {
@@ -55,14 +60,20 @@ namespace NotAMetroidGame
                 if (recoveryTimer >= 120)
                 {
                     recoveryTimer = 0;
-                    owner.changeState("Idle");
+                    if (owner.Grounded())
+                        owner.changeState("Idle");
+                    else if (owner.velocity.Y < 0)
+                        owner.changeState("Jump");
+                    else if (owner.velocity.Y > 0)
+                        owner.changeState("Fall");
                 }
-            }
+            }    
+            
         }
 
         public override string handleInput()
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }

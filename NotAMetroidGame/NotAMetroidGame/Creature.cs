@@ -111,7 +111,9 @@ namespace NotAMetroidGame
         public virtual void Update(GameTime gameTime, Level map, Player player)
         {
             currentState.Update(gameTime);
-            Debug.WriteLine(this.velocity.X);
+            Debug.WriteLine("X: " + this.velocity.X);
+            Debug.WriteLine("Y: " + this.velocity.Y);
+            //Debug.WriteLine(this.currentState);
 
             this.prevPosition = new Vector2(this.position.X, this.position.Y);
             

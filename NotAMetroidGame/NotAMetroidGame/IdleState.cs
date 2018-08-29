@@ -49,8 +49,7 @@ namespace NotAMetroidGame
             }
             else if (kstate.IsKeyDown(Keys.Up))
             {
-                owner.Move(JUMP);
-                owner.changeState("Airborne");
+                owner.changeState("Jump");
             }
         }
     }

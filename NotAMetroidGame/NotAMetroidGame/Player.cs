@@ -54,7 +54,8 @@ namespace NotAMetroidGame
             stateList = new Dictionary<String, State>();
             stateList.Add("Idle", new IdleState(this));
             stateList.Add("Walk", new WalkState(this));
-            stateList.Add("Airborne", new JumpState(this));
+            stateList.Add("Jump", new JumpState(this));
+            stateList.Add("Fall", new FallState(this));
 
 
 

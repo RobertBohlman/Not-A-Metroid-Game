@@ -8,7 +8,7 @@ namespace NotAMetroidGame
     {
         //Jump modifiers
         protected readonly float JUMPMULT = 2.5f;
-        protected readonly float FALLMULT = 15f;
+        
 
         //Movement constants
         private static readonly Vector2 RIGHT = new Vector2(250, 0);
@@ -39,17 +39,6 @@ namespace NotAMetroidGame
         {
             base.Update(gameTime);
 
-            if (owner.velocity.Y > 0)
-            {
-                owner.velocity = Vector2.Add(owner.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (JUMPMULT - 1));
-
-            }
-            else if (owner.velocity.Y < 0 && Keyboard.GetState().IsKeyUp(Keys.Up))
-            {
-                owner.velocity = Vector2.Add(owner.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (FALLMULT - 1));
-
-            }
-
             switch (jumpAngle)
             {
                 case Direction.NONE:
@@ -68,8 +57,10 @@ namespace NotAMetroidGame
                     break;
             }
 
-            if (owner.velocity.Y > 0)
+            if (owner.velocity.Y > 0 || Keyboard.GetState().IsKeyUp(Keys.Up))
                 owner.changeState("Fall");
+            else if (owner.Grounded())
+                owner.changeState("Idle");
         }
 
         public override void handleInput()

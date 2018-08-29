@@ -27,7 +27,14 @@ namespace NotAMetroidGame
             height = 600;
         }
 
-        public void Update(Vector2 newPosition, GraphicsDeviceManager graphics)
+        public Camera(Camera c)
+        {
+            position = new Vector2(c.position.X, c.position.Y);
+            width = c.width;
+            height = c.height;
+        }
+
+        public void Update(Vector2 newPosition, Level level, GraphicsDeviceManager graphics)
         {
             int bufferHeight = graphics.GraphicsDevice.PresentationParameters.BackBufferHeight;
             int bufferWidth = graphics.GraphicsDevice.PresentationParameters.BackBufferWidth;
@@ -37,6 +44,26 @@ namespace NotAMetroidGame
                 width = bufferWidth;
             }
             position = Vector2.Subtract(newPosition, new Vector2(width / 2, height / 2));
+
+            BoundingBox levelBoundary = level.GetBoundaries();
+
+            //Restricts camera movement past level boundaries.  This should be moved at some point.
+            if (position.X < levelBoundary.Min.X)
+            {
+                position.X = levelBoundary.Min.X;
+            }
+            if (position.X > levelBoundary.Max.X - width)
+            {
+                position.X = levelBoundary.Max.X - width;
+            }
+            if (position.Y < levelBoundary.Min.Y)
+            {
+                position.Y = levelBoundary.Min.Y;
+            }
+            if (position.Y > levelBoundary.Max.Y - height)
+            {
+                position.Y = levelBoundary.Max.Y - height;
+            }
         }
     }
 }

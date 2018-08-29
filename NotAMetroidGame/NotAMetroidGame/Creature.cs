@@ -138,26 +138,26 @@ namespace NotAMetroidGame
                 if (obj.Intersects(bound))
                 {
                     //Checking if the player landed on the object
-                    if (prevPosition.Y < position.Y && prevBound.Max.Y < obj.Min.Y)
+                    if (s.solidSurfaces.Contains("u") && prevPosition.Y < position.Y && prevBound.Max.Y < obj.Min.Y)
                     {
                         position.Y = obj.Min.Y + bound.Min.Y - bound.Max.Y;
                         velocity.Y = 0;
                     }
                     //Colliding with the bottom of the structure
-                    else if (prevPosition.Y > position.Y && prevBound.Min.Y > obj.Max.Y)
+                    else if (s.solidSurfaces.Contains("d") && prevPosition.Y > position.Y && prevBound.Min.Y > obj.Max.Y)
                     {
                         position.Y = obj.Max.Y;
                         velocity.Y = 0;
                     }
                     //Colliding with the left side of the structure
-                    else if (prevPosition.X < position.X && Math.Abs(obj.Min.Y - bound.Max.Y) > 0.001)
+                    else if (s.solidSurfaces.Contains("l") && prevPosition.X < position.X && Math.Abs(obj.Min.Y - bound.Max.Y) > 0.001)
                     {
                         position.X = obj.Min.X + bound.Min.X - bound.Max.X;
                         velocity.X = 0;
                         wallCollide = true;
                     }
                     //Colliding with the right side of the structure
-                    else if (prevPosition.X > position.X && Math.Abs(obj.Min.Y - bound.Max.Y) > 0.001)
+                    else if (s.solidSurfaces.Contains("r") && prevPosition.X > position.X && Math.Abs(obj.Min.Y - bound.Max.Y) > 0.001)
                     {
                         position.X = obj.Max.X;
                         velocity.X = 0;
@@ -169,6 +169,7 @@ namespace NotAMetroidGame
                     if (obj.Intersects(feet) && !(Math.Abs(feet.Min.X - obj.Max.X) < 0.001 || Math.Abs(feet.Max.X - obj.Min.X) < 0.001))
                     {
                         grounded = true;
+                        position = Vector2.Add(position, s.offset);
                         if (velocity.Y > 0)
                             velocity.Y = 0;
                     }

@@ -116,7 +116,7 @@ namespace NotAMetroidGame
                 }
                 OldKeyState = kstate;
                 player.Update(gameTime, level, player);
-                camera.Update(player.position, graphics);
+                camera.Update(player.position, level, graphics);
             }
 
             //Player to enemy hit detection
@@ -154,6 +154,7 @@ namespace NotAMetroidGame
             player.Draw(spriteBatch, camera);
             foreach (Creature enemy in level.GetCreatures())
                 enemy.Draw(spriteBatch, camera);
+            level.DrawForeground(spriteBatch, camera);
             spriteBatch.End();
 
             base.Draw(gameTime);

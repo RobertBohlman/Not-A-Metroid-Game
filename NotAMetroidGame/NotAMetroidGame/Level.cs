@@ -35,6 +35,10 @@ namespace NotAMetroidGame
         //Background image for the level.
         protected Texture2D background;
 
+        protected List<LevelLayer> bgLayers;
+
+        protected List<LevelLayer> fgLayers;
+
         //The scenery around the map, including interactable and non-interactable terrain
         protected List<Structure> structures;
         //The creatures located in this map
@@ -50,6 +54,8 @@ namespace NotAMetroidGame
             height = DEFAULT_HEIGHT;
             isOver = false;
             isPlayingCutscene = false;
+            bgLayers = new List<LevelLayer>();
+            fgLayers = new List<LevelLayer>();
         }
 
         // Getters
@@ -82,6 +88,11 @@ namespace NotAMetroidGame
         public Level GetNextLevel()
         {
             return nextLevel;
+        }
+
+        public BoundingBox GetBoundaries()
+        {
+            return new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, height, 0));
         }
 
         /// <summary>
@@ -166,23 +177,6 @@ namespace NotAMetroidGame
             structures.ForEach((s) => s.Update(gametime));
             creatures.ForEach((c) => c.Update(gametime, this, player));
 
-            //Restricts camera movement past level boundaries.  This should be moved at some point.
-            if (camera.position.X < 0)
-            {
-                camera.position.X = 0;
-            }
-            if (camera.position.X > width - camera.width)
-            {
-                camera.position.X = width - camera.width;
-            }
-            if (camera.position.Y < 0)
-            {
-                camera.position.Y = 0;
-            }
-            if (camera.position.Y > height - camera.height)
-            {
-                camera.position.Y = height - camera.height;
-            }
             OutOfBounds(player);
         }
 
@@ -198,8 +192,64 @@ namespace NotAMetroidGame
             {
                 sb.Draw(background, new Vector2(0, 0), Color.White);
             }
+            if (bgLayers.Count > 0)
+            {
+                bgLayers.ForEach((l) => l.Draw(sb, camera));
+            }
             structures.ForEach((s) => s.Draw(sb, camera));
             creatures.ForEach((e) => e.Draw(sb, camera));
+        }
+        public virtual void DrawForeground(SpriteBatch sb, Camera camera)
+        {
+            if (fgLayers.Count > 0)
+            {
+                fgLayers.ForEach((l) => l.Draw(sb, camera));
+            }
+        }
+    }
+
+    public class LevelLayer
+    {
+        protected List<Structure> entities;
+
+        protected float scale;
+
+        public LevelLayer() : this(1.0f)
+        {
+
+        }
+
+        public LevelLayer(float scale)
+        {
+            entities = new List<Structure>();
+            this.scale = scale;
+        }
+
+        public List<Structure> GetEntities()
+        {
+            return entities;
+        }
+
+        public void AddEntity(Structure entity)
+        {
+            entity.SetScale(scale);
+            entities.Add(entity);
+        }
+
+        public void RemoveEntity(int index)
+        {
+            if (index < entities.Count && index >= 0)
+            {
+                entities.RemoveAt(index);
+            }
+        }
+
+        public void Draw(SpriteBatch spritebatch, Camera camera)
+        {
+            Camera tempcam = new Camera(camera);
+            tempcam.position.X *= scale;
+            tempcam.position.Y *= scale;
+            entities.ForEach((e) => e.Draw(spritebatch, tempcam));
         }
     }
 
@@ -210,28 +260,36 @@ namespace NotAMetroidGame
     {
         private static string BG_NAME = "test_background";
 
+        public Test_00() : base()
+        {
+            width = 1200;
+        }
+
         public override void InitMap(ContentManager content)
         {
+            width = 1200;
             AddObject(new TestFloor(content, 0, 500));
             AddObject(new TestFloor(content, 800, 500));
             AddObject(new TestFloor(content, -800, 500));
-            AddObject(new TestFloorSmall(content, 0, 300));
+            AddObject(new TestPlatformSmall(content, 0, 300));
+            AddObject(new TestPlatformMoving(content, 350, 300));
             AddObject(new TestFloorSmall(content, 200, 415));
             AddObject(new TestFloorSmall(content, 700, 415));
             //AddObject(new Skeleton(content, new Vector2(500, 385)));
             background = content.Load<Texture2D>(BG_NAME);
+            LevelLayer backlayer = new LevelLayer(0.5f);
+            backlayer.AddEntity(new TestPlatformMoving(content, 350, 200));
+            bgLayers.Add(backlayer);
+            LevelLayer frontlayer = new LevelLayer(2.0f);
+            frontlayer.AddEntity(new TestPlatformMoving(content, 300, 400));
+            frontlayer.AddEntity(new TestPlatformMoving(content, 800, 600));
+            fgLayers.Add(frontlayer);
         }
 
         protected override void Transition(Player player)
         {
-            if (player.bound.Min.X >= width)
-            {
-                nextLevel = new Test_01();
-            }
-            else
-            {
-                nextLevel = new Test_00();
-            }
+            nextLevel = new Test_00();
+
             int levelWidth = nextLevel.GetWidth();
             int levelHeight = nextLevel.GetHeight();
 
@@ -252,7 +310,6 @@ namespace NotAMetroidGame
             AddObject(new TestFloor(content, 0, 500));
             AddObject(new TestFloor(content, 800, 500));
             AddObject(new TestFloor(content, -800, 500));
-            AddObject(new TestFloorSmall(content, 0, 300));
             AddObject(new TestFloorSmall(content, 200, 415));
             AddObject(new TestFloorSmall(content, 700, 415));
             background = content.Load<Texture2D>(BG_NAME);
@@ -260,18 +317,15 @@ namespace NotAMetroidGame
 
         protected override void Transition(Player player)
         {
-            if (player.bound.Max.X <= 0)
-            {
-                nextLevel = new Test_00();
-            }
-            else
-            {
-                nextLevel = new Test_01();
-            }
+            nextLevel = new Test_00();
 
             int levelWidth = nextLevel.GetWidth();
             int levelHeight = nextLevel.GetHeight();
 
+            float playerSize = player.GetSize().X;
+
+            player.position = new Vector2(Math.Abs((player.position.X + levelWidth) % nextLevel.GetWidth()) + playerSize,
+                Math.Abs((player.position.Y + levelHeight + 1) % nextLevel.GetHeight()));
         }
     }
 }

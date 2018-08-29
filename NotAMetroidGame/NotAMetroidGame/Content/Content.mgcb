@@ -97,6 +97,18 @@
 /processorParam:TextureFormat=Color
 /build:test_floor.png
 
+#begin test_platform_small.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:test_platform_small.png
+
 #begin TestFloor.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -108,16 +120,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:TestFloor.png
-
-#begin player.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:player.png
 

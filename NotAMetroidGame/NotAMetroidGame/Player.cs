@@ -25,7 +25,7 @@ namespace NotAMetroidGame
         Animation fall;
         Animation hurt;
         Animation attack;
-        private int recoveryTimer;
+        
 
         //These need to be changed to a less messy solution
         private Rectangle swingFront;
@@ -56,12 +56,13 @@ namespace NotAMetroidGame
             stateList.Add("Walk", new WalkState(this));
             stateList.Add("Jump", new JumpState(this));
             stateList.Add("Fall", new FallState(this));
+            stateList.Add("Attack", new AttackState(this));
 
 
 
             //Animation setup
             //walkRight = new Animation();
-           // walkRight.AddFrame(new Rectangle(64, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
+            // walkRight.AddFrame(new Rectangle(64, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
             //walkRight.AddFrame(new Rectangle(112, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
             //walkRight.AddFrame(new Rectangle(160, 0, 16, 32), TimeSpan.FromSeconds(.15), "walking");
 
@@ -76,15 +77,15 @@ namespace NotAMetroidGame
             //jump = new Animation();
             //jump.AddFrame(new Rectangle(208, 0, 16, 32), TimeSpan.FromSeconds(1), "jump");
 
-           // fall = jump;
+            // fall = jump;
 
             hurt = new Animation();
             hurt.AddFrame(new Rectangle(398, 0, 16, 32), TimeSpan.FromSeconds(1), "hurt");
 
-            attack = new Animation();
-            attack.AddFrame(new Rectangle(256, 0, 16, 32), TimeSpan.FromSeconds(0.15), "windup");
-            attack.AddFrame(new Rectangle(304, 0, 16, 32), TimeSpan.FromSeconds(0.15), "swing");
-            attack.AddFrame(new Rectangle(352, 0, 16, 32), TimeSpan.FromSeconds(0.15), "recovery");
+            //attack = new Animation();
+            //attack.AddFrame(new Rectangle(256, 0, 16, 32), TimeSpan.FromSeconds(0.15), "windup");
+            //attack.AddFrame(new Rectangle(304, 0, 16, 32), TimeSpan.FromSeconds(0.15), "swing");
+            //attack.AddFrame(new Rectangle(352, 0, 16, 32), TimeSpan.FromSeconds(0.15), "recovery");
 
             swingFront = new Rectangle(320, 0, 16, 32);
             swingRear = new Rectangle(288, 0, 16, 32);
@@ -142,7 +143,7 @@ namespace NotAMetroidGame
                 this.tint = Color.White;
 
             //Attack code
-            if (attacking)
+            /*if (attacking)
             {
                 //Default behavior is for the player to stand still while attacking if they're on the ground
                 if (this.Grounded())
@@ -177,7 +178,7 @@ namespace NotAMetroidGame
                     }
                 }
 
-            }
+            } */
 
            /* //Animations
             if (Keyboard.GetState().IsKeyDown(Keys.Right) && grounded)

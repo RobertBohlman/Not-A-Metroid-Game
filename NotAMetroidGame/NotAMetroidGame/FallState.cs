@@ -34,12 +34,8 @@ namespace NotAMetroidGame
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            handleInput();
 
-            if (Keyboard.GetState().IsKeyUp(Keys.Up))
-                owner.velocity = Vector2.Add(owner.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (FALLMULT - 1));
-            else
-                owner.velocity = Vector2.Add(owner.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (JUMPMULT - 1));
+            owner.velocity = Vector2.Add(owner.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (JUMPMULT - 1));
 
             switch (jumpAngle)
             {
@@ -59,13 +55,13 @@ namespace NotAMetroidGame
                     break;
             }
 
-            if (owner.Grounded() && jumpAngle == Direction.NONE)
-                owner.changeState("Idle");
-            else if (owner.Grounded())
-                owner.changeState("Walk");
+            stateChange = handleInput();
+
+            if (stateChange != null)
+                owner.changeState(stateChange);
         }
 
-        public override void handleInput()
+        public override String handleInput()
         {
             KeyboardState kstate = Keyboard.GetState();
 
@@ -76,6 +72,13 @@ namespace NotAMetroidGame
                 jumpAngle = Direction.LEFT;
             else
                 jumpAngle = Direction.NONE;
+
+            if (owner.Grounded() && jumpAngle == Direction.NONE)
+                return "Idle";
+            else if (owner.Grounded())
+                return "Walk";
+            else
+                return null;
         }
     }
 }

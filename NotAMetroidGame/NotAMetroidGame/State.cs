@@ -11,6 +11,8 @@ namespace NotAMetroidGame
         //The individual state's animation, set in contructor
         protected Animation animation;
 
+        protected String stateChange;
+
         protected State(Creature owner)
         {
             this.owner = owner;
@@ -44,14 +46,13 @@ namespace NotAMetroidGame
         public virtual void Update(GameTime gameTime)
         {
             owner.GetAnimation().Update(gameTime);
-            handleInput();
         }
 
         /// <summary>
         /// Method to decompose the input handling from
         /// the update method
         /// </summary>
-        public abstract void handleInput();
+        public abstract String handleInput();
     }
 }
 

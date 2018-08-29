@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -8,7 +9,8 @@ namespace NotAMetroidGame
     {
         //Jump modifiers
         protected readonly float JUMPMULT = 2.5f;
-        
+        protected readonly float FALLMULT = 15f;
+
 
         //Movement constants
         private static readonly Vector2 RIGHT = new Vector2(250, 0);
@@ -28,6 +30,7 @@ namespace NotAMetroidGame
         {
             base.Enter();
             owner.Move(JUMP);
+            //Debug.WriteLine("Jump");
         }
 
         public override void Exit()
@@ -57,13 +60,16 @@ namespace NotAMetroidGame
                     break;
             }
 
-            if (owner.velocity.Y > 0 || Keyboard.GetState().IsKeyUp(Keys.Up))
-                owner.changeState("Fall");
-            else if (owner.Grounded())
-                owner.changeState("Idle");
+            if (Keyboard.GetState().IsKeyUp(Keys.Up))
+                owner.velocity = Vector2.Add(owner.velocity, Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds * (FALLMULT - 1));
+
+            stateChange = handleInput();
+
+            if (stateChange != null)
+                owner.changeState(stateChange);
         }
 
-        public override void handleInput()
+        public override String handleInput()
         {
             KeyboardState kstate = Keyboard.GetState();
 
@@ -73,6 +79,13 @@ namespace NotAMetroidGame
                 jumpAngle = Direction.LEFT;
             else
                 jumpAngle = Direction.NONE;
+
+            if (owner.velocity.Y > 0)
+                return "Fall";
+            else if (owner.Grounded())
+                return "Idle";
+            else
+                return null;
         }
     }
 }

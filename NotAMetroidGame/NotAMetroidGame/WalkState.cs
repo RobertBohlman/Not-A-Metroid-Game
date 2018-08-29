@@ -43,24 +43,39 @@ namespace NotAMetroidGame
             else
                 owner.Move(LEFT);
 
-            handleInput();
+            stateChange = handleInput();
+
+            if (stateChange != null)
+                owner.changeState(stateChange);
         }
 
-        public override void handleInput()
+        public override String handleInput()
         {
             KeyboardState kstate = Keyboard.GetState();
 
             if (entryKState.IsKeyDown(Keys.Right) && kstate.IsKeyUp(Keys.Right))
             {
-                owner.changeState("Idle");
+                return "Idle";
             }
             else if (entryKState.IsKeyDown(Keys.Left) && kstate.IsKeyUp(Keys.Left))
             {
-                owner.changeState("Idle");
+                return "Idle";
             }
             else if (kstate.IsKeyDown(Keys.Up))
             {
-                owner.changeState("Jump");
+                return "Jump";
+            }
+            else if (kstate.IsKeyDown(Keys.Space))
+            {
+                return "Attack";
+            }
+            else if (owner.velocity.Y > 0)
+            {
+                return "Fall";
+            }
+            else
+            {
+                return null;
             }
         }
     }

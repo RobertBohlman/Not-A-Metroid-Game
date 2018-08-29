@@ -111,9 +111,9 @@ namespace NotAMetroidGame
         public virtual void Update(GameTime gameTime, Level map, Player player)
         {
             currentState.Update(gameTime);
-            Debug.WriteLine("X: " + this.velocity.X);
-            Debug.WriteLine("Y: " + this.velocity.Y);
+            //Debug.WriteLine(this.velocity);
             //Debug.WriteLine(this.currentState);
+            Debug.WriteLine(this.position);
 
             this.prevPosition = new Vector2(this.position.X, this.position.Y);
             
@@ -250,13 +250,15 @@ namespace NotAMetroidGame
 
         public void changeState(String stateName)
         {
+            Debug.WriteLine("Changing state to: " + stateName);
             State newState = stateList[stateName];
 
             if (currentState != null)
-                currentState.Exit();
+                    currentState.Exit();
 
             currentState = newState;
             currentState.Enter();
+            
         }
 
         public void SetFacing(int newFacing)

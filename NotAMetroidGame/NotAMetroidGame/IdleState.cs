@@ -30,26 +30,41 @@ namespace NotAMetroidGame
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            handleInput();
+            stateChange = handleInput();
+
+            if (stateChange != null)
+                owner.changeState(stateChange);
         }
 
-        public override void handleInput()
+        public override String handleInput()
         {
             var kstate = Keyboard.GetState();
 
             if (kstate.IsKeyDown(Keys.Right))
             {
                 owner.SetFacing(0);
-                owner.changeState("Walk");
+                return "Walk";
             }      
             else if (kstate.IsKeyDown(Keys.Left))
             {
                 owner.SetFacing(1);
-                owner.changeState("Walk");
+                return "Walk";
             }
             else if (kstate.IsKeyDown(Keys.Up))
             {
-                owner.changeState("Jump");
+                return "Jump";
+            }
+            else if (kstate.IsKeyDown(Keys.Space))
+            {
+                return "Attack";
+            }
+            else if (owner.velocity.Y > 0)
+            {
+                return "Fall";
+            }
+            else
+            {
+                return null;
             }
         }
     }

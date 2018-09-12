@@ -28,9 +28,15 @@ namespace NotAMetroidGame
             KeyboardState kstate = Keyboard.GetState();
 
             if (kstate.IsKeyDown(Keys.Right))
+            {
+                owner.SetFacing(0);
                 owner.Move(RIGHT);
+            }   
             else if (kstate.IsKeyDown(Keys.Left))
+            {
+                owner.SetFacing(1);
                 owner.Move(LEFT);
+            }   
             else
                 owner.velocity.X = 0;
 

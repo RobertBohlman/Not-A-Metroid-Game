@@ -44,10 +44,12 @@ namespace NotAMetroidGame
                     break;
 
                 case Direction.RIGHT:
+                    owner.SetFacing(0);
                     owner.Move(RIGHT);
                     break;
 
                 case Direction.LEFT:
+                    owner.SetFacing(1);
                     owner.Move(LEFT);
                     break;
 

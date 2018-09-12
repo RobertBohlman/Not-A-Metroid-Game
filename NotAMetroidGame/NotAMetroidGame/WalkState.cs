@@ -49,10 +49,12 @@ namespace NotAMetroidGame
 
             if (entryKState.IsKeyDown(Keys.Right) && kstate.IsKeyUp(Keys.Right))
             {
+                owner.velocity.X = 0;
                 return "Idle";
             }
             else if (entryKState.IsKeyDown(Keys.Left) && kstate.IsKeyUp(Keys.Left))
             {
+                owner.velocity.X = 0;
                 return "Idle";
             }
             else if (kstate.IsKeyDown(Keys.Up))
@@ -62,6 +64,7 @@ namespace NotAMetroidGame
             }
             else if (kstate.IsKeyDown(Keys.Space))
             {
+                owner.velocity.X = 0;
                 return "Attack";
             }
             else if (!owner.Grounded())

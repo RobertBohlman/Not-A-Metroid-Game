@@ -19,7 +19,7 @@ namespace NotAMetroidGame
         public override void Enter()
         {
             base.Enter();
-            owner.velocity.X = 0;
+            //owner.velocity.X = 0;
 
         }
 

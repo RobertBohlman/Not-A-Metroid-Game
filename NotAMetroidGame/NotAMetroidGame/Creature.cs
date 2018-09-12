@@ -113,7 +113,8 @@ namespace NotAMetroidGame
             currentState.Update(gameTime);
             //Debug.WriteLine(this.velocity);
             //Debug.WriteLine(this.currentState);
-            Debug.WriteLine(this.position);
+            //Debug.WriteLine(this.position);
+            //Debug.WriteLine(this.Grounded());
 
             this.prevPosition = new Vector2(this.position.X, this.position.Y);
             
@@ -128,8 +129,9 @@ namespace NotAMetroidGame
                     this.velocity.X = speedCap * -1;
                 }
             }
+            Collision(map);
             this.position = Vector2.Add(this.position, (this.velocity * (float)gameTime.ElapsedGameTime.TotalSeconds));
-            this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));
+            this.velocity = Vector2.Add(this.velocity, (Game1.GRAV_CONSTANT * (float)gameTime.ElapsedGameTime.TotalSeconds));   
 
             prevBound = bound;
             UpdateBounds();
@@ -199,6 +201,7 @@ namespace NotAMetroidGame
                         if (velocity.Y > 0)
                             velocity.Y = 0;
                     }
+
                 }
 
             });
